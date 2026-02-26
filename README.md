@@ -1,3 +1,4 @@
+
 # Paraallax — CSI Event Puzzle Platform
 
 > Terminal-themed, team-based puzzle competition app built with **Next.js 14 App Router**, **MongoDB Atlas**, and **Tailwind CSS**. JavaScript only.
@@ -190,3 +191,7 @@ Then re-run `node scripts/seedPuzzles.js`.
 3. Set `type: 'myNewType'` on puzzle documents in DB
 
 No DB schema changes needed.
+
+# Paraallax
+Paraallax – A terminal-style escape-room web game built with Next.js and MongoDB for CSI Enthusia. Features randomized puzzles, admin-controlled game rounds, penalty-based timer logic, and live leaderboard using polling.
+
