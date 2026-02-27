@@ -1,195 +1,274 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import PuzzleRenderer from '@/components/PuzzleRenderer';
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import PuzzleRenderer from "@/components/PuzzleRenderer";
 
 function formatTime(seconds) {
-    if (seconds <= 0) return '00:00:00';
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return [h, m, s].map((v) => String(v).padStart(2, '0')).join(':');
+  if (seconds <= 0) return "00:00:00";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
 }
 
 export default function GamePage() {
-    const router = useRouter();
-    const [state, setState] = useState(null);
-    const [message, setMessage] = useState('');
-    const [submitting, setSubmitting] = useState(false);
-    const [navigating, setNavigating] = useState(false);
-    const timerRef = useRef(null);
+  const router = useRouter();
+  const [state, setState] = useState(null);
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [navigating, setNavigating] = useState(false);
+  const [finishing, setFinishing] = useState(false);
+  const timerRef = useRef(null);
 
-    const fetchState = async () => {
-        try {
-            const res = await fetch('/api/team/state');
-            if (res.status === 401) { router.push('/team/login'); return; }
-            const data = await res.json();
-            if (data.status === 'success') { router.push('/team/success'); return; }
-            if (data.status === 'caught') { router.push('/team/caught'); return; }
-            if (data.status === 'waiting') { router.push('/team/waiting'); return; }
-            if (data.status === 'playing') setState(data);
-        } catch { /* retry on next poll */ }
-    };
-
-    useEffect(() => {
-        fetchState();
-        const interval = setInterval(fetchState, 10000);
-        return () => clearInterval(interval);
-    }, [router]);
-
-    // Client-side countdown between polls
-    useEffect(() => {
-        if (!state) return;
-        if (timerRef.current) clearInterval(timerRef.current);
-        timerRef.current = setInterval(() => {
-            setState((prev) => {
-                if (!prev) return prev;
-                const newTime = (prev.timeLeft || 0) - 1;
-                if (newTime <= 0) router.push('/team/caught');
-                return { ...prev, timeLeft: newTime };
-            });
-        }, 1000);
-        return () => clearInterval(timerRef.current);
-    }, [state?.timeLeft, router]);
-
-    async function handleSubmit(answer) {
-        if (!state || submitting) return;
-        setSubmitting(true);
-        setMessage('');
-        try {
-            const res = await fetch('/api/team/submit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ puzzleId: state.puzzle.puzzleId, answer }),
-            });
-            const data = await res.json();
-            setMessage(data.message || '');
-            if (data.allSolved) { router.push('/team/success'); return; }
-            await fetchState(); // refresh state after submit
-        } catch {
-            setMessage('Network error. Try again.');
-        } finally {
-            setSubmitting(false);
-        }
+  const fetchState = async () => {
+    try {
+      const res = await fetch("/api/team/state");
+      if (res.status === 401) {
+        router.push("/team/login");
+        return;
+      }
+      const data = await res.json();
+      if (data.status === "success") {
+        router.push("/team/success");
+        return;
+      }
+      if (data.status === "caught") {
+        router.push("/team/caught");
+        return;
+      }
+      if (data.status === "waiting") {
+        router.push("/team/waiting");
+        return;
+      }
+      if (data.status === "playing") setState(data);
+    } catch {
+      /* retry on next poll */
     }
+  };
 
-    async function navigate(direction) {
-        if (navigating) return;
-        setNavigating(true);
-        setMessage('');
-        try {
-            await fetch('/api/team/navigate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ direction }),
-            });
-            await fetchState();
-        } catch { /* ignore */ } finally {
-            setNavigating(false);
-        }
+  useEffect(() => {
+    fetchState();
+    const interval = setInterval(fetchState, 10000);
+    return () => clearInterval(interval);
+  }, [router]);
+
+  // Client-side countdown between polls
+  useEffect(() => {
+    if (!state) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setState((prev) => {
+        if (!prev) return prev;
+        const newTime = (prev.timeLeft || 0) - 1;
+        if (newTime <= 0) router.push("/team/caught");
+        return { ...prev, timeLeft: newTime };
+      });
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [state?.timeLeft, router]);
+
+  async function handleSubmit(answer) {
+    if (!state || submitting) return;
+    setSubmitting(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/team/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ puzzleId: state.puzzle.puzzleId, answer }),
+      });
+      const data = await res.json();
+      setMessage(data.message || "");
+      if (data.allSolved) {
+        router.push("/team/success");
+        return;
+      }
+      await fetchState(); // refresh state after submit
+    } catch {
+      setMessage("Network error. Try again.");
+    } finally {
+      setSubmitting(false);
     }
+  }
 
-    if (!state) {
-        return (
-            <main className="min-h-screen flex items-center justify-center">
-                <div className="text-terminal-green animate-pulse text-xl">LOADING MISSION DATA...</div>
-            </main>
-        );
+  async function navigate(direction) {
+    if (navigating) return;
+    setNavigating(true);
+    setMessage("");
+    try {
+      await fetch("/api/team/navigate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ direction }),
+      });
+      await fetchState();
+    } catch {
+      /* ignore */
+    } finally {
+      setNavigating(false);
     }
+  }
 
-    const timeColor = state.timeLeft > 300 ? 'text-terminal-green' : state.timeLeft > 60 ? 'text-terminal-amber' : 'text-terminal-red';
+  async function finishGame() {
+    if (finishing) return;
+    setFinishing(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/team/finish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMessage("✓ Game finished! Redirecting...");
+        setTimeout(() => router.push("/team/success"), 1000);
+      } else {
+        setMessage("Error: " + (data.error || "Failed to finish game"));
+      }
+    } catch {
+      setMessage("Network error. Try again.");
+    } finally {
+      setFinishing(false);
+    }
+  }
 
+  if (!state) {
     return (
-        <main className="min-h-screen p-4 max-w-4xl mx-auto">
-            {/* Top HUD */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="terminal-card text-center">
-                    <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">Time Left</div>
-                    <div className={`text-2xl font-bold ${timeColor} ${state.timeLeft <= 60 ? 'animate-pulse' : ''}`}>
-                        {formatTime(state.timeLeft)}
-                    </div>
-                </div>
-                <div className="terminal-card text-center">
-                    <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">Puzzle</div>
-                    <div className="text-terminal-green text-xl font-bold">
-                        {state.currentIndex + 1} / {state.totalPuzzles}
-                    </div>
-                </div>
-                <div className="terminal-card text-center">
-                    <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">Solved</div>
-                    <div className="text-terminal-green text-xl font-bold">
-                        {state.solvedCount} / {state.totalPuzzles}
-                    </div>
-                </div>
-            </div>
-
-            {/* Penalty display */}
-            {state.penaltySeconds > 0 && (
-                <div className="mb-4 border border-terminal-red/50 bg-red-950/20 rounded px-4 py-2 text-terminal-red text-xs">
-                    ⚠ Total penalty: -{Math.round(state.penaltySeconds / 60)} min({state.penaltySeconds}s)
-                </div>
-            )}
-
-            {/* Puzzle Card */}
-            <div className="terminal-card mb-4">
-                <div className="flex items-center justify-between mb-3">
-                    <div className="text-terminal-muted text-xs uppercase tracking-wider">
-                        ID: <span className="text-terminal-green">{state.puzzle.puzzleId}</span>
-                    </div>
-                    {state.isSolved && (
-                        <span className="text-terminal-green text-xs border border-terminal-green px-2 py-0.5 rounded">
-                            ✓ SOLVED
-                        </span>
-                    )}
-                </div>
-                <h2 className="text-terminal-green text-xl font-bold mb-4">{state.puzzle.title}</h2>
-                <p className="text-terminal-text text-sm mb-6 whitespace-pre-wrap leading-relaxed">{state.puzzle.prompt}</p>
-
-                {/* Puzzle Renderer */}
-                {!state.isSolved ? (
-                    <PuzzleRenderer
-                        puzzle={state.puzzle}
-                        onSubmit={handleSubmit}
-                        submitting={submitting}
-                    />
-                ) : (
-                    <div className="border border-terminal-green/30 rounded p-4 text-center text-terminal-green text-sm">
-                        ✓ You have already solved this puzzle. Navigate to the next one.
-                    </div>
-                )}
-
-                {/* Message */}
-                {message && (
-                    <div className={`mt-4 px-4 py-3 rounded border text-sm ${message.toLowerCase().includes('correct') || message.toLowerCase().includes('solved')
-                            ? 'border-terminal-green text-terminal-green bg-green-950/20'
-                            : 'border-terminal-red text-terminal-red bg-red-950/20'
-                        }`}>
-                        {message}
-                    </div>
-                )}
-            </div>
-
-            {/* Navigation */}
-            <div className="flex justify-between items-center">
-                <button
-                    onClick={() => navigate('prev')}
-                    disabled={state.currentIndex === 0 || navigating}
-                    className="btn-primary disabled:opacity-30"
-                >
-                    ← PREV
-                </button>
-                <span className="text-terminal-muted text-xs">
-                    {state.currentIndex + 1} of {state.totalPuzzles}
-                </span>
-                <button
-                    onClick={() => navigate('next')}
-                    disabled={state.currentIndex === state.totalPuzzles - 1 || navigating}
-                    className="btn-primary disabled:opacity-30"
-                >
-                    NEXT →
-                </button>
-            </div>
-        </main>
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-terminal-green animate-pulse text-xl">
+          LOADING MISSION DATA...
+        </div>
+      </main>
     );
+  }
+
+  const timeColor =
+    state.timeLeft > 300
+      ? "text-terminal-green"
+      : state.timeLeft > 60
+        ? "text-terminal-amber"
+        : "text-terminal-red";
+
+  return (
+    <main className="min-h-screen p-4 max-w-4xl mx-auto">
+      {/* Top HUD */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="terminal-card text-center">
+          <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
+            Time Left
+          </div>
+          <div
+            className={`text-2xl font-bold ${timeColor} ${state.timeLeft <= 60 ? "animate-pulse" : ""}`}
+          >
+            {formatTime(state.timeLeft)}
+          </div>
+        </div>
+        <div className="terminal-card text-center">
+          <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
+            Puzzle
+          </div>
+          <div className="text-terminal-green text-xl font-bold">
+            {state.currentIndex + 1} / {state.totalPuzzles}
+          </div>
+        </div>
+        <div className="terminal-card text-center">
+          <div className="text-terminal-muted text-xs uppercase tracking-wider mb-1">
+            Solved
+          </div>
+          <div className="text-terminal-green text-xl font-bold">
+            {state.solvedCount} / {state.totalPuzzles}
+          </div>
+        </div>
+      </div>
+
+      {/* Penalty display */}
+      {state.penaltySeconds > 0 && (
+        <div className="mb-4 border border-terminal-red/50 bg-red-950/20 rounded px-4 py-2 text-terminal-red text-xs">
+          ⚠ Total penalty: -{Math.round(state.penaltySeconds / 60)} min(
+          {state.penaltySeconds}s)
+        </div>
+      )}
+
+      {/* Puzzle Card */}
+      <div className="terminal-card mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-terminal-muted text-xs uppercase tracking-wider">
+            ID:{" "}
+            <span className="text-terminal-green">{state.puzzle.puzzleId}</span>
+          </div>
+          {state.isSolved && (
+            <span className="text-terminal-green text-xs border border-terminal-green px-2 py-0.5 rounded">
+              ✓ SOLVED
+            </span>
+          )}
+        </div>
+        <h2 className="text-terminal-green text-xl font-bold mb-4">
+          {state.puzzle.title}
+        </h2>
+        <p className="text-terminal-text text-sm mb-6 whitespace-pre-wrap leading-relaxed">
+          {state.puzzle.prompt}
+        </p>
+
+        {/* Puzzle Renderer */}
+        {!state.isSolved ? (
+          <PuzzleRenderer
+            puzzle={state.puzzle}
+            onSubmit={handleSubmit}
+            submitting={submitting}
+          />
+        ) : (
+          <div className="border border-terminal-green/30 rounded p-4 text-center text-terminal-green text-sm">
+            ✓ You have already solved this puzzle. Navigate to the next one.
+          </div>
+        )}
+
+        {/* Message */}
+        {message && (
+          <div
+            className={`mt-4 px-4 py-3 rounded border text-sm ${
+              message.toLowerCase().includes("correct") ||
+              message.toLowerCase().includes("solved")
+                ? "border-terminal-green text-terminal-green bg-green-950/20"
+                : "border-terminal-red text-terminal-red bg-red-950/20"
+            }`}
+          >
+            {message}
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-between items-center gap-4">
+        <button
+          onClick={() => navigate("prev")}
+          disabled={state.currentIndex === 0 || navigating}
+          className="btn-primary disabled:opacity-30"
+        >
+          ← PREV
+        </button>
+        <span className="text-terminal-muted text-xs">
+          {state.currentIndex + 1} of {state.totalPuzzles}
+        </span>
+        <button
+          onClick={() => navigate("next")}
+          disabled={state.currentIndex === state.totalPuzzles - 1 || navigating}
+          className="btn-primary disabled:opacity-30"
+        >
+          NEXT →
+        </button>
+      </div>
+
+      {/* Finish Game Button */}
+      <div className="mt-6">
+        <button
+          onClick={finishGame}
+          disabled={finishing}
+          className="btn-amber w-full py-3 text-center"
+        >
+          {finishing ? "⏳ FINISHING..." : "✓ FINISH GAME"}
+        </button>
+      </div>
+    </main>
+  );
 }
