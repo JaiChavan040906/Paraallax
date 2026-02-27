@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 const TeamSchema = new mongoose.Schema(
   {
     teamName: { type: String, required: true, unique: true, trim: true },
+    // numeric team id assigned sequentially on creation/login
+    tid: { type: Number, unique: true, sparse: true },
     status: {
       type: String,
       enum: ["inactive", "waiting", "playing", "success", "caught"],
