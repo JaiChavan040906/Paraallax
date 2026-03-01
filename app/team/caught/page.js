@@ -1,4 +1,33 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 export default function CaughtPage() {
+    const router = useRouter();
+    const [message, setMessage] = useState("");
+    const [finishing, setFinishing] = useState(false);
+
+    async function finishGame() {
+        if (finishing) return;
+        setFinishing(true);
+        setMessage("");
+        try {
+            const res = await fetch("/api/team/finish", { method: "POST" });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setMessage("Redirecting to results...");
+                setTimeout(() => router.push("/team/results"), 800);
+            } else {
+                setMessage("Error: " + (data.error || "Failed to finish game"));
+            }
+        } catch {
+            setMessage("Network error. Try again.");
+        } finally {
+            setFinishing(false);
+        }
+    }
+
     return (
         <main className="min-h-screen flex items-center justify-center p-4">
             <div className="terminal-card w-full max-w-2xl text-center border-terminal-red">
@@ -29,6 +58,22 @@ export default function CaughtPage() {
                 <div className="mt-6 text-terminal-red text-xs animate-pulse">
                     ▸ ACCESS TERMINATED ◂
                 </div>
+
+                {/* finish button */}
+                <div className="mt-6">
+                    <button
+                        onClick={finishGame}
+                        disabled={finishing}
+                        className="btn-amber w-full py-3 text-center"
+                    >
+                        {finishing ? "⏳ FINISHING..." : "✓ FINISH GAME"}
+                    </button>
+                </div>
+                {message && (
+                    <div className="mt-4 text-center text-sm text-terminal-green">
+                        {message}
+                    </div>
+                )}
             </div>
         </main>
     );

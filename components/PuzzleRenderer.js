@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import LogicPuzzle from '@/components/puzzles/LogicPuzzle';
-import HandshakePuzzle from '@/components/puzzles/HandshakePuzzle';
-import SchemaPuzzle from '@/components/puzzles/SchemaPuzzle';
+import Game1PowerGrid from '@/components/puzzles/Game1PowerGrid';
+import Game2Handshake from '@/components/puzzles/Game2Handshake';
+import Game3DatabaseSchema from '@/components/puzzles/Game3DatabaseSchema';
+import Game4Firewall from '@/components/puzzles/Game4Firewall';
+import Game5Decryption from '@/components/puzzles/Game5Decryption';
 
 // Fallback for unknown/future puzzle types — plain text input
 function FallbackPuzzle({ puzzle, onSubmit, submitting }) {
@@ -34,14 +36,22 @@ export default function PuzzleRenderer({ puzzle, onSubmit, submitting }) {
     if (!puzzle) return <div className="text-terminal-muted text-sm">No puzzle loaded.</div>;
 
     switch (puzzle.type) {
-        case 'logic':
-            return <LogicPuzzle puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+        case 'game1':
+        case 'powergrid':
+            return <Game1PowerGrid puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+        case 'game2':
         case 'handshake':
-            return <HandshakePuzzle puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+            return <Game2Handshake puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+        case 'game3':
         case 'schema':
-            return <SchemaPuzzle puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+            return <Game3DatabaseSchema puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+        case 'game4':
+        case 'firewall':
+            return <Game4Firewall puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+        case 'game5':
+        case 'decryption':
+            return <Game5Decryption puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
         default:
-            // Extensible: add new types here as new cases
             return <FallbackPuzzle puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
     }
 }

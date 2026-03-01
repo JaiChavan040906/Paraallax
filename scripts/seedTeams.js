@@ -34,7 +34,9 @@ async function main() {
             const passwordHash = await bcrypt.hash(defaultPassword, 10);
 
             const ops = [];
-            for (let j = 1; j <= 20; j++) {
+            // Default seed count is zero; set SEED_TEAM_COUNT environment variable to a positive integer if you want test teams
+    const count = parseInt(process.env.SEED_TEAM_COUNT || '0', 10);
+    for (let j = 1; j <= count; j++) {
                 const tid = `T${String(j).padStart(2, '0')}`;
                 const teamName = `Team ${String(j).padStart(2, '0')}`;
                 ops.push({

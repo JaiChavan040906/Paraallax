@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
-import Room from "@/models/Room";
+import Session from "@/models/Session";
 import Team from "@/models/Team";
 
 export async function GET(req) {
@@ -10,36 +10,62 @@ export async function GET(req) {
     if (!admin)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { searchParams } = new URL(req.url);
-    const roomId = searchParams.get("roomId");
-    if (!roomId)
-      return NextResponse.json({ error: "roomId required" }, { status: 400 });
-
     await connectDB();
-    const room = await Room.findById(roomId).lean();
-    if (!room)
-      return NextResponse.json({ error: "Room not found" }, { status: 404 });
 
-    const teams = await Team.find({ teamName: { $in: room.teamNames } }).lean();
+    // Find the most recent session (started or ended)
+    const session = await Session.findOne()
+      .sort({ startedAt: -1 })
+      .lean();
+
+    if (!session) {
+      return NextResponse.json({ leaderboard: [], session: null });
+    }
+
+    // Proactively catch any teams whose timer has expired - same logic as /api/admin/teams
+    if (session.status === "started" && session.startedAt) {
+      const endTime =
+        new Date(session.startedAt).getTime() +
+        Number(session.durationMinutes) * 60 * 1000;
+      if (Date.now() > endTime) {
+        await Team.updateMany(
+          { activeSessionId: session._id, status: "playing" },
+          { $set: { status: "caught" } },
+        );
+      }
+    }
+
+    // Get all teams that participated in this session
+    const teamNames = session.teamNames || [];
+    // Also include any playing/success/caught teams not in teamNames (late joiners)
+    const activePlaying = await Team.find({
+      status: { $in: ["playing", "success", "caught"] },
+    }).lean();
+    const allNames = [
+      ...new Set([...teamNames, ...activePlaying.map((t) => t.teamName)]),
+    ];
+
+    const teams = await Team.find({ teamName: { $in: allNames } }).lean();
 
     const now = Date.now();
     const leaderboard = teams.map((team) => {
       let timeLeft = null;
       let timeTaken = null;
 
-      if (room.startTime && room.status === "started") {
+      if (session.startedAt && session.status === "started") {
         const endTime =
-          new Date(room.startTime).getTime() + room.durationMinutes * 60 * 1000;
+          new Date(session.startedAt).getTime() +
+          Number(session.durationMinutes) * 60 * 1000;
         timeLeft =
           Math.floor((endTime - now) / 1000) - (team.penaltySeconds || 0);
         if (timeLeft < 0) timeLeft = 0;
       }
 
-      // Calculate time taken if team finished
       if (team.status === "success" && team.finishTime && team.gameStartTime) {
-        const startTime = new Date(team.gameStartTime).getTime();
-        const finishTimeMs = new Date(team.finishTime).getTime();
-        timeTaken = Math.floor((finishTimeMs - startTime) / 1000);
+        timeTaken = Math.floor(
+          (new Date(team.finishTime).getTime() -
+            new Date(team.gameStartTime).getTime()) /
+          1000
+        );
       }
 
       return {
@@ -53,20 +79,24 @@ export async function GET(req) {
       };
     });
 
-    // Sort: success first, then by solved count desc, then penalty asc
+    // Sort: success first (by timeTaken asc), then by solvedCount desc, then penalty asc
     leaderboard.sort((a, b) => {
       if (a.status === "success" && b.status !== "success") return -1;
       if (b.status === "success" && a.status !== "success") return 1;
+      if (a.status === "success" && b.status === "success") {
+        return (a.timeTaken || 0) - (b.timeTaken || 0);
+      }
       if (b.solvedCount !== a.solvedCount) return b.solvedCount - a.solvedCount;
       return a.penaltySeconds - b.penaltySeconds;
     });
 
     return NextResponse.json({
       leaderboard,
-      room: {
-        status: room.status,
-        durationMinutes: room.durationMinutes,
-        startTime: room.startTime,
+      session: {
+        _id: session._id,
+        status: session.status,
+        durationMinutes: session.durationMinutes,
+        startedAt: session.startedAt,
       },
     });
   } catch (err) {

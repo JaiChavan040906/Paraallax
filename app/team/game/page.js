@@ -18,7 +18,6 @@ export default function GamePage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [navigating, setNavigating] = useState(false);
-  const [finishing, setFinishing] = useState(false);
   const timerRef = useRef(null);
 
   const fetchState = async () => {
@@ -37,11 +36,25 @@ export default function GamePage() {
         router.push("/team/caught");
         return;
       }
+      if (data.status === "ended") {
+        router.push("/team/results");
+        return;
+      }
       if (data.status === "waiting") {
         router.push("/team/waiting");
         return;
       }
-      if (data.status === "playing") setState(data);
+      // 'loading': puzzles not ready yet (late-join race condition) — stay and retry
+      if (data.status === "loading") {
+        return;
+      }
+      // Only set state when we have full game data — guard against bare
+      // {status:'playing', shouldRedirect} that comes from the waiting-path
+      if (data.status === "playing" && data.puzzle && typeof data.timeLeft === "number") {
+        setState(data);
+      } else if (data.status === "playing") {
+        // Full data not ready yet — stay on loading screen, retry next poll
+      }
     } catch {
       /* retry on next poll */
     }
@@ -49,9 +62,21 @@ export default function GamePage() {
 
   useEffect(() => {
     fetchState();
-    const interval = setInterval(fetchState, 10000);
+    // Poll every 3s so late-joiners get their puzzle data quickly.
+    // (Previously 10s caused a long stuck "LOADING MISSION DATA..." screen.)
+    const interval = setInterval(fetchState, 3000);
     return () => clearInterval(interval);
   }, [router]);
+
+  // Auto-redirect when session ends or puzzle is missing
+  useEffect(() => {
+    if (state && !state.puzzle) {
+      const timer = setTimeout(() => {
+        router.push("/team/results");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [state?.puzzle, router]);
 
   // Client-side countdown between polls
   useEffect(() => {
@@ -110,28 +135,6 @@ export default function GamePage() {
     }
   }
 
-  async function finishGame() {
-    if (finishing) return;
-    setFinishing(true);
-    setMessage("");
-    try {
-      const res = await fetch("/api/team/finish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setMessage("✓ Game finished! Redirecting...");
-        setTimeout(() => router.push("/team/success"), 1000);
-      } else {
-        setMessage("Error: " + (data.error || "Failed to finish game"));
-      }
-    } catch {
-      setMessage("Network error. Try again.");
-    } finally {
-      setFinishing(false);
-    }
-  }
 
   if (!state) {
     return (
@@ -192,46 +195,54 @@ export default function GamePage() {
 
       {/* Puzzle Card */}
       <div className="terminal-card mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-terminal-muted text-xs uppercase tracking-wider">
-            ID:{" "}
-            <span className="text-terminal-green">{state.puzzle.puzzleId}</span>
+        {!state.puzzle ? (
+          <div className="text-terminal-red text-sm text-center py-4">
+            ⚠ Session ended. Redirecting...
           </div>
-          {state.isSolved && (
-            <span className="text-terminal-green text-xs border border-terminal-green px-2 py-0.5 rounded">
-              ✓ SOLVED
-            </span>
-          )}
-        </div>
-        <h2 className="text-terminal-green text-xl font-bold mb-4">
-          {state.puzzle.title}
-        </h2>
-        <p className="text-terminal-text text-sm mb-6 whitespace-pre-wrap leading-relaxed">
-          {state.puzzle.prompt}
-        </p>
-
-        {/* Puzzle Renderer */}
-        {!state.isSolved ? (
-          <PuzzleRenderer
-            puzzle={state.puzzle}
-            onSubmit={handleSubmit}
-            submitting={submitting}
-          />
         ) : (
-          <div className="border border-terminal-green/30 rounded p-4 text-center text-terminal-green text-sm">
-            ✓ You have already solved this puzzle. Navigate to the next one.
-          </div>
+          <>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-terminal-muted text-xs uppercase tracking-wider">
+                ID:{" "}
+                <span className="text-terminal-green">{state.puzzle.puzzleId}</span>
+              </div>
+              {state.isSolved && (
+                <span className="text-terminal-green text-xs border border-terminal-green px-2 py-0.5 rounded">
+                  ✓ SOLVED
+                </span>
+              )}
+            </div>
+            <h2 className="text-terminal-green text-xl font-bold mb-4">
+              {state.puzzle.title}
+            </h2>
+            <p className="text-terminal-text text-sm mb-6 whitespace-pre-wrap leading-relaxed">
+              {state.puzzle.prompt}
+            </p>
+
+            {/* Puzzle Renderer */}
+            {!state.isSolved ? (
+              <PuzzleRenderer
+                key={state.puzzle.puzzleId}
+                puzzle={state.puzzle}
+                onSubmit={handleSubmit}
+                submitting={submitting}
+              />
+            ) : (
+              <div className="border border-terminal-green/30 rounded p-4 text-center text-terminal-green text-sm">
+                ✓ You have already solved this puzzle. Navigate to the next one.
+              </div>
+            )}
+          </>
         )}
 
         {/* Message */}
         {message && (
           <div
-            className={`mt-4 px-4 py-3 rounded border text-sm ${
-              message.toLowerCase().includes("correct") ||
+            className={`mt-4 px-4 py-3 rounded border text-sm ${message.toLowerCase().includes("correct") ||
               message.toLowerCase().includes("solved")
-                ? "border-terminal-green text-terminal-green bg-green-950/20"
-                : "border-terminal-red text-terminal-red bg-red-950/20"
-            }`}
+              ? "border-terminal-green text-terminal-green bg-green-950/20"
+              : "border-terminal-red text-terminal-red bg-red-950/20"
+              }`}
           >
             {message}
           </div>
@@ -259,16 +270,7 @@ export default function GamePage() {
         </button>
       </div>
 
-      {/* Finish Game Button */}
-      <div className="mt-6">
-        <button
-          onClick={finishGame}
-          disabled={finishing}
-          className="btn-amber w-full py-3 text-center"
-        >
-          {finishing ? "⏳ FINISHING..." : "✓ FINISH GAME"}
-        </button>
-      </div>
+
     </main>
   );
 }

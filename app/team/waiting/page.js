@@ -54,28 +54,29 @@ export default function WaitingPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
-      <div className="terminal-card w-full max-w-lg text-center">
-        {/* ASCII Logo */}
-        <pre className="text-terminal-green text-xs leading-tight mb-6 glow-text hidden sm:block">{`
- ██████╗  █████╗ ██████╗  █████╗  █████╗ ██╗     ██╗      █████╗ ██╗  ██╗
- ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔══██╗██║     ██║     ██╔══██╗╚██╗██╔╝
- ██████╔╝███████║██████╔╝███████║███████║██║     ██║     ███████║ ╚███╔╝ 
- ██╔═══╝ ██╔══██║██╔══██╗██╔══██║██╔══██║██║     ██║     ██╔══██║ ██╔██╗ 
- ██║     ██║  ██║██║  ██║██║  ██║██║  ██║███████╗███████╗██║  ██║██╔╝ ██╗
- ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝`}</pre>
+      <div className="terminal-card w-full max-w-2xl text-center">
+         {/* ASCII Logo */}
+         <div className="w-full flex justify-center overflow-hidden mb-6">
+           <pre className="text-terminal-green text-xs leading-tight glow-text hidden sm:block inline-block">{`
+██████╗  █████╗ ██████╗  █████╗  █████╗ ██╗     ██╗      █████╗ ██╗  ██╗
+██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔══██╗██║     ██║     ██╔══██╗╚██╗██╔╝
+██████╔╝███████║██████╔╝███████║███████║██║     ██║     ███████║ ╚███╔╝ 
+██╔═══╝ ██╔══██║██╔══██╗██╔══██║██╔══██║██║     ██║     ██╔══██║ ██╔██╗ 
+██║     ██║  ██║██║  ██║██║  ██║██║  ██║███████╗███████╗██║  ██║██╔╝ ██╗
+╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝`}</pre>
+         </div>
 
-        <div className="text-terminal-green text-2xl font-bold glow-text mb-1 sm:hidden">
+        <div className="text-terminal-green text-2xl font-bold glow-text mb-1 sm:hidden w-full text-center">
           PARAALLAX
         </div>
 
-        <div className="border border-terminal-border rounded p-4 mb-6 bg-black/40">
-          <div className="text-terminal-amber text-sm uppercase tracking-widest mb-2">
+        <div className="border border-terminal-border rounded p-6 mb-6 bg-black/40">
+          <div className="text-terminal-amber text-lg uppercase tracking-widest mb-3">
             ⏳ Waiting for Admin to Start Game{dots}
           </div>
           {teamName && (
-            <div className="text-terminal-muted text-xs">
-              TEAM:{" "}
-              <span className="text-terminal-green font-bold">{teamName}</span>
+            <div className="text-terminal-muted text-sm">
+              TEAM: <span className="text-terminal-green font-bold">{teamName}</span>
             </div>
           )}
         </div>

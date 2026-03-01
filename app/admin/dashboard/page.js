@@ -33,6 +33,9 @@ export default function AdminDashboard() {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const timerRef = useRef(null);
+  const [session, setSession] = useState(null);
+  const [eventLog, setEventLog] = useState([]);
+  const [sessionTimer, setSessionTimer] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -44,14 +47,12 @@ export default function AdminDashboard() {
       const teamsData = await teamsRes.json();
       setTeams(teamsData.teams || []);
 
-      if (activeRoomId) {
-        const lbRes = await fetch(
-          `/api/admin/leaderboard?roomId=${activeRoomId}`,
-        );
-        if (lbRes.ok) {
-          const lbData = await lbRes.json();
-          setLeaderboard(lbData.leaderboard || []);
-        }
+      // Leaderboard always auto-fetches — no roomId needed
+      const lbRes = await fetch("/api/admin/leaderboard");
+      if (lbRes.ok) {
+        const lbData = await lbRes.json();
+        setLeaderboard(lbData.leaderboard || []);
+        if (lbData.session) setSession(lbData.session);
       }
     } catch {
       /* network, retry */
@@ -62,7 +63,16 @@ export default function AdminDashboard() {
     fetchData();
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
-  }, [activeRoomId, router]);
+  }, [router]);
+
+  // ensure event log interval cleaned
+  useEffect(() => {
+    const eventInterval = setInterval(() => {
+      if (session && session._id) fetchEventLog(session._id);
+      else fetchEventLog();
+    }, 5000);
+    return () => clearInterval(eventInterval);
+  }, [session]);
 
   // Client-side countdown timer for time left
   useEffect(() => {
@@ -77,6 +87,88 @@ export default function AdminDashboard() {
     }, 1000);
     return () => clearInterval(timerRef.current);
   }, []);
+
+  // fetch event log for admin terminal
+  async function fetchEventLog(sessionId) {
+    try {
+      const url = sessionId ? `/api/admin/session/event-log?sessionId=${sessionId}` : '/api/admin/session/event-log';
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const data = await res.json();
+      // session might be null (before start) so explicitly update
+      if ('session' in data) setSession(data.session);
+      if (Array.isArray(data.eventLog)) setEventLog(data.eventLog);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // helper to compute session remaining seconds
+  function computeSessionRemaining(s) {
+    if (!s || !s.startedAt || !s.durationMinutes) return null;
+    const end = new Date(s.startedAt).getTime() + Number(s.durationMinutes) * 60000;
+    return Math.max(0, Math.round((end - Date.now()) / 1000));
+  }
+
+  async function startSession() {
+    if (loading) return;
+    setLoading(true);
+    setMsg("");
+    try {
+      const body = { durationMinutes: durationMinutes || 90, puzzlesPerTeam: puzzlesPerTeam || 5 };
+      const res = await fetch('/api/admin/session/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!res.ok) setMsg('Error: ' + (data.error || 'Failed to start'));
+      else {
+        setMsg('✓ Session started');
+        fetchEventLog(data.sessionId);
+      }
+    } catch (e) {
+      setMsg('Network error');
+    }
+    setLoading(false);
+  }
+
+  async function stopSession() {
+    if (loading) return;
+    setLoading(true);
+    setMsg("");
+    try {
+      const body = { sessionId: session && session.id ? session.id : session && session._id };
+      const res = await fetch('/api/admin/session/stop', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!res.ok) setMsg('Error: ' + (data.error || 'Failed to stop'));
+      else {
+        setMsg('✓ Session stopped');
+        fetchEventLog(body.sessionId);
+      }
+    } catch (e) {
+      setMsg('Network error');
+    }
+    setLoading(false);
+  }
+
+  async function clearSession() {
+    if (loading) return;
+    setLoading(true);
+    setMsg("");
+    try {
+      const body = { sessionId: session && session.id ? session.id : session && session._id };
+      const res = await fetch('/api/admin/session/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!res.ok) setMsg('Error: ' + (data.error || 'Failed to clear'));
+      else {
+        setMsg('✓ Cleared teams and sessions');
+        // refresh
+        setSession(null);
+        setEventLog([]);
+        fetchData();
+      }
+    } catch (e) {
+      setMsg('Network error');
+    }
+    setLoading(false);
+  }
 
   function toggleTeamName(teamName) {
     setSelectedTeamNames((prev) =>
@@ -173,7 +265,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT: Team Selection + Controls */}
         <div className="lg:col-span-1 space-y-4">
-          {/* Waiting Teams */}
+          {/* Waiting Teams (display only) */}
           <div className="terminal-card">
             <div className="terminal-header">
               Waiting Teams ({waitingTeams.length})
@@ -183,133 +275,83 @@ export default function AdminDashboard() {
                 No teams waiting. Teams must log in first.
               </p>
             ) : (
-              <div className="space-y-1 max-h-48 overflow-y-auto">
+              <div className="space-y-1 max-h-48 overflow-y-auto text-terminal-green text-sm">
                 {waitingTeams.map((t) => (
-                  <label
-                    key={t.teamName}
-                    className={`flex items-center gap-3 p-2 rounded cursor-pointer border transition-all ${
-                      selectedTeamNames.includes(t.teamName)
-                        ? "border-terminal-green bg-green-950/30"
-                        : "border-transparent hover:border-terminal-border"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTeamNames.includes(t.teamName)}
-                      onChange={() => toggleTeamName(t.teamName)}
-                      className="accent-terminal-green"
-                      id={`team-${t.teamName}`}
-                    />
-                    <span className="text-terminal-green text-sm font-bold">
-                      {t.teamName}
-                    </span>
-                  </label>
+                  <div key={t.teamName} className="p-2">
+                    {t.teamName}
+                  </div>
                 ))}
               </div>
             )}
-            <div className="flex gap-2 mt-3">
-              <button
-                onClick={() =>
-                  setSelectedTeamNames(waitingTeams.map((t) => t.teamName))
-                }
-                className="text-xs text-terminal-green hover:underline"
-              >
-                Select All
-              </button>
-              <button
-                onClick={() => setSelectedTeamNames([])}
-                className="text-xs text-terminal-muted hover:underline"
-              >
-                Clear
-              </button>
+            <p className="text-terminal-muted text-xs mt-2">
+              All teams logged in before session start are shown here.
+            </p>
+          </div>
+
+          {/* Session Controls */}
+          <div className="terminal-card space-y-3">
+            <div className="terminal-header">Session Controls</div>
+            <div>
+              <label className="text-terminal-muted text-xs block mb-1">Puzzles per Team</label>
+              <input type="number" min="1" max="30" value={puzzlesPerTeam} onChange={(e) => setPuzzlesPerTeam(e.target.value)} className="terminal-input" id="puzzles-per-team" />
+            </div>
+            <div>
+              <label className="text-terminal-muted text-xs block mb-1">Duration (minutes)</label>
+              <input type="number" min="1" max="300" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} className="terminal-input" id="duration-minutes" />
+            </div>
+            <button onClick={startSession} disabled={loading} className="btn-amber w-full disabled:opacity-30">{loading ? "STARTING..." : "▶ START SESSION"}</button>
+            <div className="text-terminal-muted text-xs mt-2">Active session: {session && session._id ? session._id.toString().slice(-8) : 'none'}</div>
+            <div className="mt-2">
+              <button onClick={stopSession} disabled={!session || session.status !== 'started'} className="btn-primary w-full disabled:opacity-30">STOP SESSION</button>
+            </div>
+            <div className="mt-2">
+              <button onClick={clearSession} className="btn-amber w-full">CLEAR TEAMS & SESSIONS</button>
             </div>
           </div>
 
-          {/* Create Room Controls */}
-          <div className="terminal-card space-y-3">
-            <div className="terminal-header">Create Room</div>
-            <div>
-              <label className="text-terminal-muted text-xs block mb-1">
-                Puzzles per Team
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="30"
-                value={puzzlesPerTeam}
-                onChange={(e) => setPuzzlesPerTeam(e.target.value)}
-                className="terminal-input"
-                id="puzzles-per-team"
-              />
+          {/* Live Event Terminal */}
+          <div className="terminal-card">
+            <div className="terminal-header">Event Terminal</div>
+            <div className="text-terminal-muted text-xs mb-2">Live log of teams and timings</div>
+            <div className="max-h-48 overflow-y-auto text-xs">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-terminal-muted">
+                    <th className="text-left px-2 py-1">Team</th>
+                    <th className="text-left px-2 py-1">Login</th>
+                    <th className="text-left px-2 py-1">Game Start</th>
+                    <th className="text-left px-2 py-1">Status</th>
+                    <th className="text-left px-2 py-1">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {eventLog.map((e) => (
+                    <tr key={e.teamName} className="border-b border-terminal-border/20">
+                      <td className="px-2 py-1 text-terminal-green font-bold">{e.teamName}</td>
+                      <td className="px-2 py-1">{e.loginTime ? new Date(e.loginTime).toLocaleTimeString() : '—'}</td>
+                      <td className="px-2 py-1">{e.gameStartedAt ? new Date(e.gameStartedAt).toLocaleTimeString() : '—'}</td>
+                      <td className="px-2 py-1">{e.status || '—'}</td>
+                      <td className="px-2 py-1">{e.finalScore != null ? e.finalScore : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <button
-              onClick={createRoom}
-              disabled={loading || selectedTeamNames.length === 0}
-              className="btn-amber w-full disabled:opacity-30"
-            >
-              {loading
-                ? "CREATING..."
-                : `> CREATE ROOM (${selectedTeamNames.length} teams)`}
-            </button>
-          </div>
-
-          {/* Start Game Controls */}
-          <div className="terminal-card space-y-3">
-            <div className="terminal-header">Start Game</div>
-            {createdRoomId && (
-              <div className="text-terminal-green text-xs border border-terminal-green/30 rounded px-2 py-1">
-                Room ready:{" "}
-                <span className="font-mono">{createdRoomId.slice(-8)}...</span>
-              </div>
-            )}
-            <div>
-              <label className="text-terminal-muted text-xs block mb-1">
-                Duration (minutes)
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="300"
-                value={durationMinutes}
-                onChange={(e) => setDurationMinutes(e.target.value)}
-                className="terminal-input"
-                id="duration-minutes"
-              />
-            </div>
-            <button
-              onClick={startRoom}
-              disabled={loading || (!createdRoomId && !activeRoomId)}
-              className="btn-primary w-full disabled:opacity-30"
-            >
-              {loading ? "STARTING..." : "▶ START GAME"}
-            </button>
           </div>
 
           {/* Message */}
           {msg && (
             <div
-              className={`px-4 py-2 rounded border text-xs ${
-                msg.startsWith("✓")
+              className={`px-4 py-2 rounded border text-xs ${msg.startsWith("✓")
                   ? "border-terminal-green text-terminal-green bg-green-950/20"
                   : "border-terminal-red text-terminal-red bg-red-950/20"
-              }`}
+                }`}
             >
               {msg}
             </div>
           )}
 
-          {/* Active room input */}
-          <div className="terminal-card">
-            <div className="terminal-header">View Leaderboard</div>
-            <input
-              type="text"
-              className="terminal-input text-xs"
-              placeholder="Paste Room ID..."
-              value={activeRoomId}
-              onChange={(e) => setActiveRoomId(e.target.value)}
-              id="room-id-input"
-            />
-          </div>
+
         </div>
 
         {/* RIGHT: Status + Leaderboard */}
@@ -366,7 +408,7 @@ export default function AdminDashboard() {
           {/* Leaderboard */}
           {leaderboard.length > 0 && (
             <div className="terminal-card">
-              <div className="terminal-header">Leaderboard (Active Room)</div>
+              <div className="terminal-header">Leaderboard</div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
@@ -391,13 +433,12 @@ export default function AdminDashboard() {
                     {leaderboard.map((t, idx) => (
                       <tr
                         key={t.teamName}
-                        className={`border-b border-terminal-border/30 ${
-                          t.status === "success"
+                        className={`border-b border-terminal-border/30 ${t.status === "success"
                             ? "bg-green-950/20"
                             : t.status === "caught"
                               ? "bg-red-950/10"
                               : ""
-                        }`}
+                          }`}
                       >
                         <td className="px-2 py-2 text-terminal-muted">
                           {idx + 1}
@@ -423,15 +464,14 @@ export default function AdminDashboard() {
                             : "—"}
                         </td>
                         <td
-                          className={`px-2 py-2 font-mono ${
-                            t.status === "success"
+                          className={`px-2 py-2 font-mono ${t.status === "success"
                               ? "text-terminal-green"
                               : t.timeLeft > 300
                                 ? "text-terminal-green"
                                 : t.timeLeft > 60
                                   ? "text-terminal-amber"
                                   : "text-terminal-red"
-                          }`}
+                            }`}
                         >
                           {t.status === "success" && t.timeTaken
                             ? formatTime(t.timeTaken)
