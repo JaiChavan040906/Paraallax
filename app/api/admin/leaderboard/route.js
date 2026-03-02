@@ -79,15 +79,14 @@ export async function GET(req) {
       };
     });
 
-    // Sort: success first (by timeTaken asc), then by solvedCount desc, then penalty asc
+    // Sort: 1st priority = score (solvedCount) descending
+    //       2nd priority = penalty (penaltySeconds) ascending (less penalty wins ties)
+    //       3rd priority = timeLeft descending (more time remaining = solved faster = wins ties)
     leaderboard.sort((a, b) => {
-      if (a.status === "success" && b.status !== "success") return -1;
-      if (b.status === "success" && a.status !== "success") return 1;
-      if (a.status === "success" && b.status === "success") {
-        return (a.timeTaken || 0) - (b.timeTaken || 0);
-      }
       if (b.solvedCount !== a.solvedCount) return b.solvedCount - a.solvedCount;
-      return a.penaltySeconds - b.penaltySeconds;
+      if ((a.penaltySeconds || 0) !== (b.penaltySeconds || 0))
+        return (a.penaltySeconds || 0) - (b.penaltySeconds || 0);
+      return (b.timeLeft || 0) - (a.timeLeft || 0);
     });
 
     return NextResponse.json({

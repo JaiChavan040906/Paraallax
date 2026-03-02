@@ -28,6 +28,7 @@ export default function AdminDashboard() {
   const [selectedTeamNames, setSelectedTeamNames] = useState([]);
   const [puzzlesPerTeam, setPuzzlesPerTeam] = useState(5);
   const [durationMinutes, setDurationMinutes] = useState(90);
+  const [penaltyMinutes, setPenaltyMinutes] = useState(5);
   const [activeRoomId, setActiveRoomId] = useState("");
   const [createdRoomId, setCreatedRoomId] = useState("");
   const [msg, setMsg] = useState("");
@@ -115,7 +116,7 @@ export default function AdminDashboard() {
     setLoading(true);
     setMsg("");
     try {
-      const body = { durationMinutes: durationMinutes || 90, puzzlesPerTeam: puzzlesPerTeam || 5 };
+      const body = { durationMinutes: durationMinutes || 90, puzzlesPerTeam: puzzlesPerTeam || 5, penaltyMinutes: penaltyMinutes || 5 };
       const res = await fetch('/api/admin/session/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) setMsg('Error: ' + (data.error || 'Failed to start'));
@@ -299,6 +300,10 @@ export default function AdminDashboard() {
               <label className="text-terminal-muted text-xs block mb-1">Duration (minutes)</label>
               <input type="number" min="1" max="300" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} className="terminal-input" id="duration-minutes" />
             </div>
+            <div>
+              <label className="text-terminal-muted text-xs block mb-1">Penalty per Wrong Answer (minutes)</label>
+              <input type="number" min="1" max="60" value={penaltyMinutes} onChange={(e) => setPenaltyMinutes(e.target.value)} className="terminal-input" id="penalty-minutes" />
+            </div>
             <button onClick={startSession} disabled={loading} className="btn-amber w-full disabled:opacity-30">{loading ? "STARTING..." : "▶ START SESSION"}</button>
             <div className="text-terminal-muted text-xs mt-2">Active session: {session && session._id ? session._id.toString().slice(-8) : 'none'}</div>
             <div className="mt-2">
@@ -343,8 +348,8 @@ export default function AdminDashboard() {
           {msg && (
             <div
               className={`px-4 py-2 rounded border text-xs ${msg.startsWith("✓")
-                  ? "border-terminal-green text-terminal-green bg-green-950/20"
-                  : "border-terminal-red text-terminal-red bg-red-950/20"
+                ? "border-terminal-green text-terminal-green bg-green-950/20"
+                : "border-terminal-red text-terminal-red bg-red-950/20"
                 }`}
             >
               {msg}
@@ -434,10 +439,10 @@ export default function AdminDashboard() {
                       <tr
                         key={t.teamName}
                         className={`border-b border-terminal-border/30 ${t.status === "success"
-                            ? "bg-green-950/20"
-                            : t.status === "caught"
-                              ? "bg-red-950/10"
-                              : ""
+                          ? "bg-green-950/20"
+                          : t.status === "caught"
+                            ? "bg-red-950/10"
+                            : ""
                           }`}
                       >
                         <td className="px-2 py-2 text-terminal-muted">
@@ -465,12 +470,12 @@ export default function AdminDashboard() {
                         </td>
                         <td
                           className={`px-2 py-2 font-mono ${t.status === "success"
+                            ? "text-terminal-green"
+                            : t.timeLeft > 300
                               ? "text-terminal-green"
-                              : t.timeLeft > 300
-                                ? "text-terminal-green"
-                                : t.timeLeft > 60
-                                  ? "text-terminal-amber"
-                                  : "text-terminal-red"
+                              : t.timeLeft > 60
+                                ? "text-terminal-amber"
+                                : "text-terminal-red"
                             }`}
                         >
                           {t.status === "success" && t.timeTaken

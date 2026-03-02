@@ -44,7 +44,7 @@ export async function POST(req) {
     const admin = await getAdminFromRequest(req);
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { durationMinutes, puzzlesPerTeam } = await req.json();
+    const { durationMinutes, puzzlesPerTeam, penaltyMinutes } = await req.json();
     if (!durationMinutes || durationMinutes < 1) {
       return NextResponse.json({ error: "durationMinutes must be >= 1" }, { status: 400 });
     }
@@ -75,6 +75,7 @@ export async function POST(req) {
       startedAt: startTime,
       durationMinutes: Number(durationMinutes),
       puzzlesPerTeam: Number(puzzlesPerTeam || 5),
+      penaltyMinutes: Number(penaltyMinutes ?? 5),
       teamNames,
     });
 
