@@ -38,6 +38,7 @@ export default function AdminDashboard() {
   const [eventLog, setEventLog] = useState([]);
   const [sessionTimer, setSessionTimer] = useState(null);
 
+
   const fetchData = async () => {
     try {
       const teamsRes = await fetch("/api/admin/teams");
@@ -240,6 +241,43 @@ export default function AdminDashboard() {
     setLoading(false);
   }
 
+  const [approvedNames, setApprovedNames] = useState([]);
+
+  function toggleApprove(teamName) {
+    setApprovedNames((prev) =>
+      prev.includes(teamName)
+        ? prev.filter((t) => t !== teamName)
+        : [...prev, teamName]
+    );
+  }
+
+  async function approveTeams() {
+    if (approvedNames.length === 0) {
+      setMsg("Select at least one team to allow.");
+      return;
+    }
+    setLoading(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/approve-teams", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamNames: approvedNames }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMsg("Error: " + (data.error || "Failed to approve"));
+      } else {
+        setMsg(`✓ Approved ${data.approved?.length || 0} team(s)`);
+        setApprovedNames([]);
+        fetchData();
+      }
+    } catch {
+      setMsg("Network error");
+    }
+    setLoading(false);
+  }
+
   const waitingTeams = teams.filter((t) => t.status === "waiting");
   const playingTeams = teams.filter((t) =>
     ["playing", "success", "caught"].includes(t.status),
@@ -260,32 +298,79 @@ export default function AdminDashboard() {
             Control Panel · Polling every 10s
           </div>
         </div>
-        <div className="text-terminal-muted text-xs animate-pulse">◌ LIVE</div>
+        <div className="flex items-center gap-3">
+          {session && (
+            <button
+              onClick={() => router.push("/admin/leaderboard")}
+              className="btn-amber text-xs px-3 py-1"
+            >
+              📊 View Leaderboard
+            </button>
+          )}
+          <div className="text-terminal-muted text-xs animate-pulse">◌ LIVE</div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT: Team Selection + Controls */}
         <div className="lg:col-span-1 space-y-4">
-          {/* Waiting Teams (display only) */}
+          {/* Waiting Teams — with approval checkboxes */}
           <div className="terminal-card">
-            <div className="terminal-header">
-              Waiting Teams ({waitingTeams.length})
+            <div className="terminal-header flex items-center justify-between">
+              <span>Waiting Teams ({waitingTeams.length})</span>
+              {waitingTeams.length > 0 && (
+                <button
+                  onClick={() =>
+                    setApprovedNames(
+                      approvedNames.length === waitingTeams.length
+                        ? []
+                        : waitingTeams.map((t) => t.teamName)
+                    )
+                  }
+                  className="text-terminal-muted text-xs hover:text-terminal-green"
+                >
+                  {approvedNames.length === waitingTeams.length ? "Deselect All" : "Select All"}
+                </button>
+              )}
             </div>
             {waitingTeams.length === 0 ? (
               <p className="text-terminal-muted text-xs">
                 No teams waiting. Teams must log in first.
               </p>
             ) : (
-              <div className="space-y-1 max-h-48 overflow-y-auto text-terminal-green text-sm">
+              <div className="space-y-1 max-h-48 overflow-y-auto">
                 {waitingTeams.map((t) => (
-                  <div key={t.teamName} className="p-2">
-                    {t.teamName}
-                  </div>
+                  <label
+                    key={t.teamName}
+                    className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-terminal-border/10"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={approvedNames.includes(t.teamName)}
+                      onChange={() => toggleApprove(t.teamName)}
+                      className="accent-green-500 w-4 h-4"
+                    />
+                    <span className="text-terminal-green text-sm font-bold">{t.teamName}</span>
+                    <span className="text-terminal-muted text-xs ml-auto">
+                      {t.waitingRoomEnteredAt
+                        ? new Date(t.waitingRoomEnteredAt).toLocaleTimeString()
+                        : ""}
+                    </span>
+                  </label>
                 ))}
               </div>
             )}
+            {waitingTeams.length > 0 && (
+              <button
+                onClick={approveTeams}
+                disabled={loading || approvedNames.length === 0}
+                className="btn-amber w-full mt-3 disabled:opacity-30"
+              >
+                {loading ? "ALLOWING..." : `✔ ALLOW SELECTED (${approvedNames.length})`}
+              </button>
+            )}
             <p className="text-terminal-muted text-xs mt-2">
-              All teams logged in before session start are shown here.
+              Tick teams and click Allow to send them into the game.
             </p>
           </div>
 
@@ -356,6 +441,19 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {/* Past Sessions — link to dedicated page */}
+          <div className="terminal-card">
+            <div className="terminal-header">Past Sessions</div>
+            <p className="text-terminal-muted text-xs mb-3">
+              View archived leaderboards from all previous events.
+            </p>
+            <button
+              onClick={() => router.push("/admin/past-sessions")}
+              className="btn-amber w-full"
+            >
+              📁 View Past Sessions
+            </button>
+          </div>
 
         </div>
 

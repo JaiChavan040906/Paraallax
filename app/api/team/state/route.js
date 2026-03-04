@@ -5,21 +5,7 @@ import Session from '@/models/Session';
 import Puzzle from '@/models/Puzzle';
 import Team from '@/models/Team';
 
-// Fisher-Yates shuffle with team-specific seed so simultaneous late-joiners
-// still get different puzzle sequences.
-function teamSpecificShuffle(arr, teamSeed) {
-    const a = [...arr];
-    let seedOffset = 0;
-    for (let k = 0; k < teamSeed.length; k++) {
-        seedOffset = (seedOffset * 31 + teamSeed.charCodeAt(k)) >>> 0;
-    }
-    for (let i = a.length - 1; i > 0; i--) {
-        const raw = Math.random() + (seedOffset % (i + 1)) / (i + 2);
-        const j = Math.floor(raw * (i + 1)) % (i + 1);
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-}
+
 
 export async function GET(req) {
     try {
@@ -28,51 +14,11 @@ export async function GET(req) {
 
         await connectDB();
 
-        // ── Waiting state ────────────────────────────────────────────────────────
-        // When a team is waiting and a session is active, promote them to 'playing'
-        // right here so the very next poll from /team/game already has full data.
+        // ── Waiting state ─────────────────────────────────────────────────────────
+        // Always return 'waiting' — admin must explicitly approve the team.
+        // The approve-teams endpoint handles puzzle assignment and promotion.
         if (team.status === 'waiting') {
-            let session = null;
-            if (team.activeSessionId) session = await Session.findById(team.activeSessionId);
-            if (!session) session = await Session.findOne({ status: 'started' }).sort({ startedAt: -1 });
-
-            if (!session || session.status !== 'started') {
-                return NextResponse.json({ status: 'waiting' });
-            }
-
-            // Check if the session already has an assignment for this team
-            const existingAssignment = session.assignments && session.assignments.get(team.teamName);
-            let assignment = existingAssignment;
-
-            if (!assignment || assignment.length === 0) {
-                // Assign puzzles now (same logic as login route)
-                const allPuzzles = await Puzzle.find({}, 'puzzleId').lean();
-                const allIds = allPuzzles.map((p) => p.puzzleId);
-                const take = Number(session.puzzlesPerTeam || 5);
-                const pool = teamSpecificShuffle(allIds, team.teamName);
-                assignment = pool.slice(0, take);
-                assignment = teamSpecificShuffle(assignment, team.teamName + '_order');
-
-                if (!session.assignments) session.assignments = new Map();
-                session.assignments.set(team.teamName, assignment);
-                await session.save();
-            }
-
-            // Promote the team in the DB
-            const now = new Date();
-            await Team.findByIdAndUpdate(team._id, {
-                status: 'playing',
-                assignedPuzzleIds: assignment,
-                activeSessionId: session._id,
-                waitingRoomEnteredAt: null,
-                currentIndex: 0,
-                solvedPuzzleIds: [],
-                penaltySeconds: 0,
-                gameStartTime: now,
-            });
-
-            // Return the redirect signal so the waiting-room page navigates to game
-            return NextResponse.json({ status: 'playing', shouldRedirect: '/team/game' });
+            return NextResponse.json({ status: 'waiting' });
         }
 
         // ── Terminal states ──────────────────────────────────────────────────────
