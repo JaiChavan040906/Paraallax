@@ -51,7 +51,7 @@ export default function AdminLeaderboardPage() {
 
     useEffect(() => {
         fetchLeaderboard();
-        const interval = setInterval(fetchLeaderboard, 10000);
+        const interval = setInterval(fetchLeaderboard, 1000);
         return () => clearInterval(interval);
     }, []);
 
@@ -85,7 +85,7 @@ export default function AdminLeaderboardPage() {
                         PARAALLAX — LEADERBOARD
                     </div>
                     <div className="text-terminal-muted text-xs uppercase tracking-wider">
-                        Live Rankings · Auto-refresh every 10s
+                        Live Rankings · Auto-refresh every 2.5s
                     </div>
                 </div>
                 <div className="flex items-center gap-4">

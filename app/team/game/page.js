@@ -62,9 +62,8 @@ export default function GamePage() {
 
   useEffect(() => {
     fetchState();
-    // Poll every 3s so late-joiners get their puzzle data quickly.
-    // (Previously 10s caused a long stuck "LOADING MISSION DATA..." screen.)
-    const interval = setInterval(fetchState, 3000);
+    // Poll every 1.0s for maximum realtime update rate (safe on local deployment)
+    const interval = setInterval(fetchState, 1000);
     return () => clearInterval(interval);
   }, [router]);
 

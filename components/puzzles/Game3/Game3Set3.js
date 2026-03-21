@@ -66,15 +66,18 @@ export default function Game3Set3({ puzzle, onSubmit, submitting }) {
         // Basic generic feedback
         if (!normalizedInput.includes("select ") || !normalizedInput.includes("from ")) {
             printLine("ERROR 1064: You have an error in your SQL syntax.", "error");
+            fetch("/api/team/add-penalty", { method: "POST" });
             return;
         }
 
         if (!normalizedInput.endsWith(";")) {
-            printLine("ERROR: Query must end with a semicolon (;).", "error");
+            printLine(`ERROR: Syntax error near '${query.substring(0, 10)}...'`, "error");
+            fetch("/api/team/add-penalty", { method: "POST" });
             return;
         }
 
         printLine("ERROR 0000: QUERY EXECUTED BUT RETURNED NO MATCHING INCIDENT DATA.", "error");
+        fetch("/api/team/add-penalty", { method: "POST" });
     };
 
     const handleSubmit = (e) => {
@@ -128,7 +131,7 @@ export default function Game3Set3({ puzzle, onSubmit, submitting }) {
                 ) : (
                     <div className={styles.completeActions}>
                         <button className={styles.proceedBtn} disabled={submitting} onClick={() => onSubmit("Solved")}>
-                            {submitting ? 'SUBMITTING...' : '[ ENTER SECTOR 4 ]'}
+                            {submitting ? 'SUBMITTING...' : 'SUBMIT DATABASE LOGS'}
                         </button>
                     </div>
                 )}

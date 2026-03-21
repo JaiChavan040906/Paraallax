@@ -29,6 +29,7 @@ export default function Game6Set3({ puzzle, onSubmit, submitting }) {
       setTimeout(() => onSubmit("Solved"), 2000);
     } else {
       setStatus("wrong");
+      fetch("/api/team/add-penalty", { method: "POST" });
       setShake(true);
       setTimeout(() => setShake(false), 600);
     }

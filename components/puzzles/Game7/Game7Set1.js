@@ -89,6 +89,7 @@ export default function Game7Set1({ puzzle, onSubmit, submitting }) {
       }
     } else {
       setReqMsg({ text: "INVALID REQUEST OUTPUT", ok: false });
+      fetch("/api/team/add-penalty", { method: "POST" });
     }
 
     setReqInput("");
@@ -105,6 +106,7 @@ export default function Game7Set1({ puzzle, onSubmit, submitting }) {
       setTimeout(() => onSubmit("Solved"), 2200);
     } else {
       setFinalMsg({ text: "INVALID FINAL ASSEMBLY", ok: false });
+      fetch("/api/team/add-penalty", { method: "POST" });
     }
 
     setFinalInput("");

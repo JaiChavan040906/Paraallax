@@ -11,11 +11,7 @@ const TeamSchema = new mongoose.Schema(
       enum: ["inactive", "waiting", "playing", "success", "caught"],
       default: "inactive",
     },
-    activeRoomId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Room",
-      default: null,
-    },
+
     // new: reference to a global Session (one session per event/batch)
     activeSessionId: {
       type: mongoose.Schema.Types.ObjectId,

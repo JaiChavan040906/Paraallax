@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useLayoutEffect } from 'react';
+import React, { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import styles from './Game1PowerGrid.module.css';
 
 
@@ -62,9 +62,21 @@ export default function Game1Set3({ puzzle, onSubmit, submitting }) {
     const fixedC = z3Out !== z4Out; // XOR(Z3, Z4)
     const zFinalOut = fixedA && fixedB && fixedC; // AND(FixedA, FixedB, FixedC)
 
+    const [hasTriggeredPenalty, setHasTriggeredPenalty] = useState(false);
+
     const isAllPlaced = z1 !== null && z2 !== null && z3 !== null && z4 !== null;
     const isSuccess = isAllPlaced && zFinalOut;
     const hasError = isAllPlaced && !zFinalOut;
+
+    useEffect(() => {
+        if (hasError && !hasTriggeredPenalty) {
+            setHasTriggeredPenalty(true);
+            fetch("/api/team/add-penalty", { method: "POST" });
+        } else if (!isAllPlaced) {
+            setHasTriggeredPenalty(false);
+        }
+    }, [hasError, isAllPlaced, hasTriggeredPenalty]);
+
 
     const handleDrop = (zone, gate) => {
         if (z1 === gate) setZ1(null);
@@ -187,7 +199,7 @@ export default function Game1Set3({ puzzle, onSubmit, submitting }) {
 
             {isSuccess && (
                 <button className={styles.completeBtn} disabled={submitting} onClick={() => onSubmit("Solved")}>
-                    {submitting ? "SUBMITTING..." : "Proceed to Sector 2"}
+                    {submitting ? "SUBMITTING..." : "SUBMIT POWER GRID"}
                 </button>
             )}
         </div>

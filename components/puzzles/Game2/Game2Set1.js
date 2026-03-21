@@ -41,6 +41,7 @@ export default function Game2Set1({ puzzle, onSubmit, submitting }) {
     const [flashState, setFlashState] = useState('none');
     const [isGameActive, setIsGameActive] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
+    const [zeroScoreCount, setZeroScoreCount] = useState(0);
 
     const logsRef = useRef(logs);
     const progressRef = useRef(progress);
@@ -60,14 +61,28 @@ export default function Game2Set1({ puzzle, onSubmit, submitting }) {
 
     const handleFailure = useCallback(() => {
         triggerFlash('error');
-        setProgress(Math.max(0, progressRef.current - 2)); // Punish by -2 instead of full reset
+        const prevProgress = progressRef.current;
+        const newProgress = Math.max(0, prevProgress - 2);
+        setProgress(newProgress);
+        
+        if (prevProgress > 0 && newProgress === 0) {
+            setZeroScoreCount(prev => {
+                const next = prev + 1;
+                if (next % 2 === 0) {
+                    fetch("/api/team/add-penalty", { 
+                        method: "POST" 
+                    });
+                }
+                return next;
+            });
+        }
         // Mark the active one as missed if it was pending
         setLogs(prev => prev.map((log, idx) =>
             idx === prev.length - 1 && log.status === 'pending'
                 ? { ...log, status: 'missed' }
                 : log
         ));
-    }, []);
+    }, [triggerFlash]);
 
     const spawnNewCode = useCallback(() => {
         if (!isGameActiveRef.current) return;
@@ -139,6 +154,7 @@ export default function Game2Set1({ puzzle, onSubmit, submitting }) {
             if (newProgress >= TARGET_SCORE) {
                 setIsGameActive(false);
                 setIsComplete(true);
+                setTimeout(() => onSubmit("Solved"), 2000);
             }
         } else {
             handleFailure();
@@ -199,7 +215,7 @@ export default function Game2Set1({ puzzle, onSubmit, submitting }) {
                     {isComplete && (
                         <div className={styles.completeOverlay}>
                             <h3>ACCESS GRANTED</h3>
-                            <button className={styles.successBtn} disabled={submitting} onClick={() => onSubmit("Solved")}>{submitting ? 'SUBMITTING...' : 'PROCEED TO SECTOR 3'}</button>
+                            <div className="text-terminal-green animate-pulse mt-4">SUBMITTING INTERCEPT DATA...</div>
                         </div>
                     )}
 

@@ -144,10 +144,12 @@ export default function Game5Set2({ puzzle, onSubmit, submitting }) {
         if (clean.startsWith("kill")) {
             print("Incorrect process terminated ❌", "error");
             print("Deadlock persists...", "error");
+            fetch("/api/team/add-penalty", { method: "POST" });
             return;
         }
 
         print("Invalid command", "error");
+        fetch("/api/team/add-penalty", { method: "POST" });
     };
 
     const handleSubmit = (e) => {
@@ -206,7 +208,7 @@ export default function Game5Set2({ puzzle, onSubmit, submitting }) {
                 <div className={styles.inputArea}>
                     <span className={styles.success}>
                         <button className={styles.proceedBtn} disabled={submitting} onClick={() => onSubmit("Solved")}>
-                            {submitting ? 'SUBMITTING...' : '[ PROCEED TO NEXT CLUSTER ]'}
+                            {submitting ? 'SUBMITTING...' : 'SUBMIT PROCESS LOGS'}
                         </button>
                     </span>
                 </div>

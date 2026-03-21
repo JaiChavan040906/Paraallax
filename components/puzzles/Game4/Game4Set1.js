@@ -108,10 +108,10 @@ export default function Game4Set1({ puzzle, onSubmit, submitting }) {
 
       setPos({ x: nextX, y: nextY });
 
-      // Only complete if player reaches the exact target point
       if (nextX === currentSet.target[0] && nextY === currentSet.target[1]) {
         setStatus("success");
         if (timerRef.current) clearInterval(timerRef.current);
+        setTimeout(() => onSubmit("Solved"), 2000);
       }
     },
     [currentSet.target[0], currentSet.target[1], triggerCollision]
@@ -159,6 +159,7 @@ export default function Game4Set1({ puzzle, onSubmit, submitting }) {
         setTimeLeft((prev) => {
           if (prev <= 1) {
             setStatus("failed");
+            fetch("/api/team/add-penalty", { method: "POST" });
             return 0;
           }
           return prev - 1;
@@ -231,9 +232,7 @@ export default function Game4Set1({ puzzle, onSubmit, submitting }) {
           <p className={styles.brief}>
             Target reached. Decision protocol executed successfully.
           </p>
-          <button className={styles.proceedBtn} disabled={submitting} onClick={() => onSubmit("Solved")}>
-            {submitting ? 'SUBMITTING...' : '[ PROCEED TO NEXT SECTOR ]'}
-          </button>
+          <div className="text-terminal-green animate-pulse">SUBMITTING FIREWALL COMPLETION...</div>
         </div>
       </div>
     );

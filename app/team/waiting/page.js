@@ -44,7 +44,7 @@ export default function WaitingPage() {
     };
 
     poll(); // immediate first check
-    const pollInterval = setInterval(poll, 10000);
+    const pollInterval = setInterval(poll, 1000);
 
     return () => {
       clearInterval(dotInterval);
@@ -84,7 +84,7 @@ export default function WaitingPage() {
         <div className="text-terminal-muted text-xs space-y-1">
           <div>► Do NOT refresh or close this tab</div>
           <div>► You will be redirected automatically when the game starts</div>
-          <div>► Polling every 10 seconds</div>
+          <div>► System tracking enabled</div>
         </div>
 
         <div className="mt-6 flex items-center justify-center gap-2 text-terminal-muted text-xs">

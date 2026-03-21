@@ -9,6 +9,6 @@ export async function GET(req) {
   return NextResponse.json({
     teamName: team.teamName,
     status: team.status,
-    activeRoomId: team.activeRoomId,
+
   });
 }

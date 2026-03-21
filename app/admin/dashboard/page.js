@@ -61,7 +61,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 10000);
+    const interval = setInterval(fetchData, 1000);
     return () => clearInterval(interval);
   }, [router]);
 
@@ -70,7 +70,7 @@ export default function AdminDashboard() {
     const eventInterval = setInterval(() => {
       if (session && session._id) fetchEventLog(session._id);
       else fetchEventLog();
-    }, 5000);
+    }, 1000);
     return () => clearInterval(eventInterval);
   }, [session]);
 

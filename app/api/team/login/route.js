@@ -147,7 +147,7 @@ export async function POST(req) {
     team.solvedPuzzleIds = [];
     team.penaltySeconds = 0;
     team.activeSessionId = null;
-    team.activeRoomId = null;
+
     team.gameStartTime = null;
     team.finishTime = null;
     team.finalScore = null;
