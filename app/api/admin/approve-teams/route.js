@@ -6,30 +6,7 @@ import Session from "@/models/Session";
 import Team from "@/models/Team";
 import Puzzle from "@/models/Puzzle";
 
-// Fisher-Yates shuffle
-function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-}
-
-// Team-specific shuffle for diversity
-function teamSpecificShuffle(arr, teamSeed) {
-    const a = [...arr];
-    let seedOffset = 0;
-    for (let k = 0; k < teamSeed.length; k++) {
-        seedOffset = (seedOffset * 31 + teamSeed.charCodeAt(k)) >>> 0;
-    }
-    for (let i = a.length - 1; i > 0; i--) {
-        const raw = Math.random() + (seedOffset % (i + 1)) / (i + 2);
-        const j = Math.floor(raw * (i + 1)) % (i + 1);
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-}
+import { dealDomainPuzzles } from "@/lib/puzzleAssigner";
 
 // POST /api/admin/approve-teams
 // Body: { teamNames: string[] }
@@ -58,8 +35,8 @@ export async function POST(req) {
         });
 
         // Fetch all puzzles for assignment
-        const allPuzzles = await Puzzle.find({}, "puzzleId").lean();
-        const allPuzzleIds = allPuzzles.map((p) => p.puzzleId);
+        const allPuzzles = await Puzzle.find({}, "puzzleId type").lean();
+
 
         const approved = [];
         const notFound = [];
@@ -79,15 +56,15 @@ export async function POST(req) {
                 let assignment = existingAssignment;
 
                 if (!assignment || assignment.length === 0) {
-                    // Generate fresh, team-unique puzzle assignment
-                    const take = Number(activeSession.puzzlesPerTeam || 5);
-                    const poolForTeam = teamSpecificShuffle(allPuzzleIds, team.teamName);
-                    assignment = poolForTeam.slice(0, take);
-                    assignment = teamSpecificShuffle(assignment, team.teamName + "_order");
+                    // Generate fresh, team-unique puzzle assignment 
+                    // dealDomainPuzzles natively avoids adjacent duplication and mixes sets from domains
+                    const dealt = dealDomainPuzzles(allPuzzles, [team.teamName]);
+                    assignment = dealt[team.teamName];
 
                     // Persist to session
                     activeSession.assignments.set(team.teamName, assignment);
                 }
+
 
                 // Add to session teamNames if not already present
                 if (!activeSession.teamNames.includes(team.teamName)) {

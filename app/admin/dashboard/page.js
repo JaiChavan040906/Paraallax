@@ -24,13 +24,11 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [teams, setTeams] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [selectedTeamNames, setSelectedTeamNames] = useState([]);
-  const [puzzlesPerTeam, setPuzzlesPerTeam] = useState(5);
+
+
   const [durationMinutes, setDurationMinutes] = useState(90);
   const [penaltyMinutes, setPenaltyMinutes] = useState(5);
-  const [activeRoomId, setActiveRoomId] = useState("");
-  const [createdRoomId, setCreatedRoomId] = useState("");
+
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const timerRef = useRef(null);
@@ -117,7 +115,7 @@ export default function AdminDashboard() {
     setLoading(true);
     setMsg("");
     try {
-      const body = { durationMinutes: durationMinutes || 90, puzzlesPerTeam: puzzlesPerTeam || 5, penaltyMinutes: penaltyMinutes || 5 };
+      const body = { durationMinutes: durationMinutes || 90, penaltyMinutes: penaltyMinutes || 5 };
       const res = await fetch('/api/admin/session/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) setMsg('Error: ' + (data.error || 'Failed to start'));
@@ -172,74 +170,7 @@ export default function AdminDashboard() {
     setLoading(false);
   }
 
-  function toggleTeamName(teamName) {
-    setSelectedTeamNames((prev) =>
-      prev.includes(teamName)
-        ? prev.filter((t) => t !== teamName)
-        : [...prev, teamName],
-    );
-  }
 
-  async function createRoom() {
-    if (selectedTeamNames.length === 0) {
-      setMsg("Select at least one team.");
-      return;
-    }
-    setLoading(true);
-    setMsg("");
-    try {
-      const res = await fetch("/api/admin/room/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          teamNames: selectedTeamNames,
-          puzzlesPerTeam: Number(puzzlesPerTeam),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setMsg("Error: " + data.error);
-      } else {
-        setCreatedRoomId(data.roomId);
-        setMsg(`✓ Room created. ID: ${data.roomId}`);
-      }
-    } catch {
-      setMsg("Network error");
-    }
-    setLoading(false);
-  }
-
-  async function startRoom() {
-    const roomId = createdRoomId || activeRoomId;
-    if (!roomId) {
-      setMsg("Create a room first.");
-      return;
-    }
-    setLoading(true);
-    setMsg("");
-    try {
-      const res = await fetch("/api/admin/room/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roomId,
-          durationMinutes: Number(durationMinutes),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setMsg("Error: " + data.error);
-      } else {
-        setActiveRoomId(roomId);
-        setMsg(`✓ Game started! Duration: ${durationMinutes} min`);
-        setCreatedRoomId("");
-        fetchData();
-      }
-    } catch {
-      setMsg("Network error");
-    }
-    setLoading(false);
-  }
 
   const [approvedNames, setApprovedNames] = useState([]);
 
@@ -377,10 +308,7 @@ export default function AdminDashboard() {
           {/* Session Controls */}
           <div className="terminal-card space-y-3">
             <div className="terminal-header">Session Controls</div>
-            <div>
-              <label className="text-terminal-muted text-xs block mb-1">Puzzles per Team</label>
-              <input type="number" min="1" max="30" value={puzzlesPerTeam} onChange={(e) => setPuzzlesPerTeam(e.target.value)} className="terminal-input" id="puzzles-per-team" />
-            </div>
+
             <div>
               <label className="text-terminal-muted text-xs block mb-1">Duration (minutes)</label>
               <input type="number" min="1" max="300" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} className="terminal-input" id="duration-minutes" />

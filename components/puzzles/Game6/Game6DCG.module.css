@@ -1,0 +1,421 @@
+/* ====================================================
+   Game7DCG — Dynamic Cipher Grid
+   Dark / Cyan hacker terminal theme
+   ==================================================== */
+
+.page {
+  min-height: 100vh;
+  background: #090c10;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 200, 255, 0.07) 0%, transparent 70%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 20px 72px;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: #c8d6e5;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 780px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.badge {
+  display: inline-block;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #00d4ff;
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 4px;
+  padding: 4px 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #e8f4ff;
+  line-height: 1.25;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6a8599;
+  letter-spacing: 0.3px;
+}
+
+.chipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #7fa8bf;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  padding: 5px 12px;
+}
+
+.chipActive {
+  color: #00d4ff;
+  background: rgba(0, 212, 255, 0.07);
+  border-color: rgba(0, 212, 255, 0.25);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00d4ff;
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.8);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.028);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 28px 30px;
+  box-shadow:
+    0 0 0 1px rgba(0, 212, 255, 0.04),
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sectionLabel {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #00d4ff;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.divider {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.25) 0%, transparent 100%);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 4px;
+}
+
+.gridRow {
+  display: flex;
+  gap: 24px;
+}
+
+.gridCell {
+  font-family: "Courier New", monospace;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #e0edf7;
+  min-width: 32px;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+
+.gridCell:hover {
+  color: #00d4ff;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
+}
+
+.sequenceText {
+  margin: 0;
+  font-family: "Courier New", monospace;
+  font-size: 1.05rem;
+  letter-spacing: 2px;
+  color: #a8c8e8;
+  padding-left: 4px;
+  line-height: 1.6;
+}
+
+.keyBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 4px;
+  font-family: "Courier New", monospace;
+  font-size: 0.95rem;
+  color: #7fa8bf;
+  letter-spacing: 1px;
+  line-height: 1.8;
+}
+
+.submitPanel {
+  background: rgba(0, 212, 255, 0.03);
+  border-color: rgba(0, 212, 255, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(0, 212, 255, 0.06),
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(0, 212, 255, 0.07);
+  gap: 16px;
+}
+
+.submitTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #e0edf7;
+}
+
+.submitDivider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.3) 0%, transparent 100%);
+}
+
+.inputLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6a8599;
+}
+
+.inputRow {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.textInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #e8f4ff;
+  font-family: "Courier New", monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 4px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  text-transform: uppercase;
+}
+
+.textInput::placeholder {
+  color: rgba(255, 255, 255, 0.15);
+  letter-spacing: 4px;
+}
+
+.textInput:focus {
+  border-color: rgba(0, 212, 255, 0.45);
+  box-shadow:
+    0 0 0 3px rgba(0, 212, 255, 0.08),
+    0 0 16px rgba(0, 212, 255, 0.1);
+  background: rgba(0, 212, 255, 0.04);
+}
+
+.textInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitBtn {
+  font-family: "Courier New", monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #00d4ff;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: rgba(0, 212, 255, 0.18);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.inputNote {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #4a6070;
+  letter-spacing: 0.5px;
+}
+
+.feedback {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  border: 1px solid;
+  animation: fadeSlideIn 0.3s ease forwards;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feedbackIcon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.feedbackTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.feedbackSub {
+  font-size: 0.78rem;
+  margin-top: 2px;
+  opacity: 0.7;
+  letter-spacing: 0.5px;
+}
+
+.feedbackSuccess {
+  background: rgba(0, 255, 150, 0.06);
+  border-color: rgba(0, 255, 150, 0.3);
+  color: #00e88a;
+  box-shadow: 0 0 20px rgba(0, 255, 150, 0.1);
+}
+
+.feedbackError {
+  background: rgba(255, 60, 80, 0.06);
+  border-color: rgba(255, 60, 80, 0.3);
+  color: #ff5e70;
+  box-shadow: 0 0 20px rgba(255, 60, 80, 0.1);
+}
+
+.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 80% {
+    transform: translateX(4px);
+  }
+  30%, 50%, 70% {
+    transform: translateX(-4px);
+  }
+  40%, 60% {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 28px 14px 48px;
+  }
+
+  .panel {
+    padding: 20px 18px;
+  }
+
+  .title {
+    font-size: 1.15rem;
+  }
+
+  .inputRow {
+    flex-direction: column;
+  }
+
+  .submitBtn {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .chipsRow {
+    gap: 8px;
+  }
+
+  .gridRow {
+    gap: 18px;
+  }
+
+  .gridCell,
+  .sequenceText {
+    font-size: 0.95rem;
+  }
+}

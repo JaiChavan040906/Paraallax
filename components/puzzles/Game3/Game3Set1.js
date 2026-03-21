@@ -1,14 +1,21 @@
 "use client";
 
-import React, { useState, useEffect, useRef, FormEvent } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './Game3DatabaseSchema.module.css';
 
-export default function Game3DatabaseSchema({ onComplete }) {
+
+export default function Game3Set1({ puzzle, onSubmit, submitting }) {
+    const narrative = {
+        prompt: "Sector 7G breach by Employee ID 4091. Need full name for incident report.",
+        expectedQuery: "select first_name, last_name from personnel where emp_id = 4091;",
+        successData: ["1 ROW(S) RETURNED:", "FIRST_NAME: HOMER", "LAST_NAME: SIMPSON"]
+    };
+
     const [lines, setLines] = useState([
         { id: 1, text: "PARALLAX MAINFRAME OS v3.11", type: "system" },
         { id: 2, text: "LOGIN FAILED. DATABASE CORRUPTION DETECTED.", type: "error" },
         { id: 3, text: "EMERGENCY OVERRIDE CONSOLE ACTIVE.", type: "system" },
-        { id: 4, text: "HINT: Retrieve the FULL_NAME of all registered EMPLOYEES to authenticate.", type: "system" },
+        { id: 4, text: `INCIDENT REPORT: ${narrative.prompt}`, type: "system" },
     ]);
     const [currentInput, setCurrentInput] = useState('');
     const [isComplete, setIsComplete] = useState(false);
@@ -20,6 +27,7 @@ export default function Game3DatabaseSchema({ onComplete }) {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [lines]);
 
+    // Keep focus on input
     useEffect(() => {
         const handleGlobalClick = () => {
             if (!isComplete && window.getSelection()?.toString() === '') {
@@ -40,55 +48,33 @@ export default function Game3DatabaseSchema({ onComplete }) {
 
         printLine(`> ${q}`, 'input');
 
-        const syntaxSelectPattern = /^select\s+(.+?)\s+from\s+(.+?);?$/i;
-        const strictMatch = /^select\s+full_name\s+from\s+employees;?$/i;
-        const colWrongTableUsers = /^select\s+name\s+from\s+users;?$/i;
-        const colCorrectTableUsers = /^select\s+full_name\s+from\s+users;?$/i;
-        const colWrongTableCorrect = /^select\s+name\s+from\s+employees;?$/i;
+        // Normalize spaces and quotes for matching
+        const normalizedInput = q.toLowerCase().replace(/\s+/g, ' ').replace(/'/g, '"').trim();
+        const expected = narrative.expectedQuery.toLowerCase().replace(/\s+/g, ' ').replace(/'/g, '"').trim();
 
-        if (strictMatch.test(q)) {
+        // Exact match checking
+        if (normalizedInput === expected) {
             printLine("Executing query...", "system");
             setTimeout(() => {
-                printLine("1 ROW(S) RETURNED.", "output");
-                printLine("JOHN DOE (SYSTEM ADMIN)", "output");
-                printLine("ACCESS GRANTED", "success");
+                narrative.successData.forEach(line => printLine(line, "output"));
+                printLine("DATA RETRIEVED. ACCESS GRANTED", "success");
                 setIsComplete(true);
             }, 800);
             return;
         }
 
-        if (colWrongTableUsers.test(q)) {
-            printLine("ERROR 1054: Unknown column 'name' in 'field list'", "error");
+        // Basic generic feedback
+        if (!normalizedInput.includes("select ") || !normalizedInput.includes("from ")) {
+            printLine("ERROR 1064: You have an error in your SQL syntax.", "error");
             return;
         }
 
-        if (colCorrectTableUsers.test(q)) {
-            printLine("ERROR 1146: Table 'users' doesn't exist", "error");
+        if (!normalizedInput.endsWith(";")) {
+            printLine("ERROR: Query must end with a semicolon (;).", "error");
             return;
         }
 
-        if (colWrongTableCorrect.test(q)) {
-            printLine("ERROR 1054: Unknown column 'name' in 'field list'", "error");
-            return;
-        }
-
-        const match = q.match(syntaxSelectPattern);
-        if (match) {
-            const [, col, table] = match;
-            const colClean = col.trim().toUpperCase();
-            const tableClean = table.trim().toUpperCase();
-
-            if (tableClean !== 'EMPLOYEES') {
-                printLine(`ERROR 1146: Table '${tableClean.toLowerCase()}' doesn't exist`, "error");
-            } else if (colClean !== 'FULL_NAME') {
-                printLine(`ERROR 1054: Unknown column '${colClean.toLowerCase()}' in 'field list'`, "error");
-            } else {
-                printLine("ERROR 0000: UNKNOWN SYSTEM EXCEPTION", "error");
-            }
-            return;
-        }
-
-        printLine("ERROR 1064: You have an error in your SQL syntax.", "error");
+        printLine("ERROR 0000: QUERY EXECUTED BUT RETURNED NO MATCHING INCIDENT DATA.", "error");
     };
 
     const handleSubmit = (e) => {
@@ -115,12 +101,6 @@ export default function Game3DatabaseSchema({ onComplete }) {
  / /| |/ /   / /     / __/  \\__ \\\\__ \\
 / ___ / /___/ /___  / /___ ___/ /__/ /
 /_/  |_\\____/\\____/ /_____//____/____/
-
-   __________  ___    _   ________________  ____
-  / ____/ __ \\/   |  / | / /_  __/ ____/ / / __ \\
- / / __/ /_/ / /| | /  |/ / / / / __/ / / / / / /
-/ /_/ / _, _/ ___ |/ /|  / / / / /___/ /_/ / /_/ /
-\\____/_/ |_/_/  |_/_/ |_/ /_/ /_____/\\____/_____/
 `}
                                 </pre>
                             )}
@@ -147,8 +127,8 @@ export default function Game3DatabaseSchema({ onComplete }) {
                     </form>
                 ) : (
                     <div className={styles.completeActions}>
-                        <button className={styles.proceedBtn} onClick={onComplete}>
-                            [ ENTER SECTOR 4 ]
+                        <button className={styles.proceedBtn} disabled={submitting} onClick={() => onSubmit("Solved")}>
+                            {submitting ? 'SUBMITTING...' : '[ ENTER SECTOR 4 ]'}
                         </button>
                     </div>
                 )}

@@ -135,46 +135,6 @@ export default function GamePage() {
     }
   }
 
-  // ⚠️  DEBUG ONLY — remove before going live
-  const [debugSolving, setDebugSolving] = useState(false);
-  async function debugSolveAndNext() {
-    if (debugSolving) return;
-    setDebugSolving(true);
-    setMessage("");
-    try {
-      const res = await fetch("/api/team/debug-solve", { method: "POST" });
-      const data = await res.json();
-      if (data.allSolved) {
-        router.push("/team/success");
-        return;
-      }
-      setMessage(data.message || "");
-      await fetchState();
-    } catch {
-      setMessage("Debug solve failed.");
-    } finally {
-      setDebugSolving(false);
-    }
-  }
-
-  // ⚠️  DEBUG ONLY — remove before going live
-  const [applyingPenalty, setApplyingPenalty] = useState(false);
-  async function handleAddPenalty() {
-    if (applyingPenalty) return;
-    setApplyingPenalty(true);
-    setMessage("");
-    try {
-      const res = await fetch("/api/team/penalty", { method: "POST" });
-      const data = await res.json();
-      setMessage(data.message || "Penalty applied.");
-      await fetchState(); // refresh HUD so penaltySeconds updates immediately
-    } catch {
-      setMessage("Failed to apply penalty.");
-    } finally {
-      setApplyingPenalty(false);
-    }
-  }
-
 
   if (!state) {
     return (
@@ -289,26 +249,7 @@ export default function GamePage() {
         )}
       </div>
 
-      {/* ⚠️  DEBUG BLOCK — remove before going live */}
-      <div className="mb-4 border border-yellow-500/60 rounded p-3 bg-yellow-950/20 flex items-center justify-between gap-3 flex-wrap">
-        <div className="text-yellow-400 text-xs font-mono">⚠ DEBUG MODE</div>
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={debugSolveAndNext}
-            disabled={debugSolving}
-            className="px-4 py-2 text-xs font-bold tracking-widest rounded border border-yellow-500 text-yellow-300 bg-yellow-900/30 hover:bg-yellow-800/40 transition-colors disabled:opacity-40"
-          >
-            {debugSolving ? "⏳ SOLVING..." : "⚡ NEXT + SOLVE"}
-          </button>
-          <button
-            onClick={handleAddPenalty}
-            disabled={applyingPenalty}
-            className="px-4 py-2 text-xs font-bold tracking-widest rounded border border-red-500 text-red-300 bg-red-900/30 hover:bg-red-800/40 transition-colors disabled:opacity-40"
-          >
-            {applyingPenalty ? "⏳ APPLYING..." : "⚠ ADD PENALTY"}
-          </button>
-        </div>
-      </div>
+
 
       {/* Navigation */}
       <div className="flex justify-between items-center gap-4">

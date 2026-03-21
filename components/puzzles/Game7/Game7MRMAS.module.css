@@ -1,0 +1,489 @@
+/* ======================================================
+   Game8MRMAS — Multi-Request Memory Access System
+   Multi-set terminal UI: Alpha / Beta / Gamma
+   ====================================================== */
+
+.page {
+  min-height: 100vh;
+  background: #070a0e;
+  background-image:
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(0, 180, 255, 0.06) 0%, transparent 70%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 44px 20px 72px;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: #b8ccd8;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.setBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 200, 255, 0.28);
+  background: rgba(0, 200, 255, 0.08);
+  color: #7fe4ff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.systemBadges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.systemChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #7a9ab0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #e4f0ff;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.titleIcon {
+  font-size: 1.3rem;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #4e6a7a;
+  letter-spacing: 0.4px;
+}
+
+.headerDivider {
+  margin-top: 10px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 180, 255, 0.3) 0%, transparent 100%);
+}
+
+.objectivePanel {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.objTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #00c8ff;
+}
+
+.objList {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.83rem;
+  color: #7a9ab0;
+  line-height: 1.9;
+  letter-spacing: 0.2px;
+}
+
+.objList li {
+  padding-left: 4px;
+}
+
+.terminal {
+  background: #07090d;
+  border: 1px solid rgba(0, 180, 255, 0.15);
+  border-radius: 14px;
+  padding: 28px 30px;
+  box-shadow:
+    0 0 0 1px rgba(0, 180, 255, 0.05),
+    0 0 40px rgba(0, 0, 0, 0.7),
+    inset 0 0 60px rgba(0, 180, 255, 0.02);
+  font-family: "Courier New", "Lucida Console", monospace;
+  font-size: 0.88rem;
+  color: #8ab4c8;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.termLine {
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.termBlank {
+  height: 10px;
+}
+
+.prompt {
+  color: #00c8ff;
+  margin-right: 8px;
+}
+
+.dim {
+  color: #3d5566;
+}
+
+.accent {
+  color: #00c8ff;
+  font-weight: 600;
+}
+
+.termSection {
+  margin-top: 18px;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #00c8ff;
+  border-top: 1px solid rgba(0, 180, 255, 0.18);
+  border-bottom: 1px solid rgba(0, 180, 255, 0.18);
+  padding: 6px 0;
+}
+
+.reqRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.reqLabel {
+  color: #6a8fa5;
+  min-width: 48px;
+}
+
+.reqColon {
+  color: #3d5566;
+}
+
+.reqBinary {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #c8e0f0;
+  letter-spacing: 3px;
+  flex: 1;
+}
+
+.reqStatus {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.statusLocked {
+  color: #3e5060;
+  background: rgba(60, 80, 96, 0.15);
+  border: 1px solid rgba(60, 80, 96, 0.3);
+}
+
+.statusPending {
+  color: #f5c542;
+  background: rgba(245, 197, 66, 0.1);
+  border: 1px solid rgba(245, 197, 66, 0.35);
+  box-shadow: 0 0 8px rgba(245, 197, 66, 0.15);
+  animation: pendingPulse 2s ease-in-out infinite;
+}
+
+@keyframes pendingPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.statusSolved {
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.35);
+  box-shadow: 0 0 8px rgba(46, 204, 113, 0.15);
+}
+
+.outRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.outLabel {
+  color: #4e6a7a;
+  min-width: 120px;
+}
+
+.outColon {
+  color: #2d4050;
+}
+
+.outBlank {
+  color: #2d4050;
+  letter-spacing: 2px;
+}
+
+.outSolved {
+  color: #2ecc71;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+.inputSection {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inputPromptLabel {
+  font-size: 0.78rem;
+  color: #4e6a7a;
+  letter-spacing: 1px;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.inputCaret {
+  color: #00c8ff;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.termInput {
+  background: rgba(0, 180, 255, 0.05);
+  border: 1px solid rgba(0, 180, 255, 0.2);
+  border-radius: 6px;
+  color: #e4f0ff;
+  font-family: "Courier New", monospace;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  padding: 9px 14px;
+  outline: none;
+  text-transform: uppercase;
+  width: 120px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.termInput:focus {
+  border-color: rgba(0, 180, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.08), 0 0 14px rgba(0, 180, 255, 0.12);
+}
+
+.termInput::placeholder {
+  color: rgba(255, 255, 255, 0.1);
+  letter-spacing: 4px;
+}
+
+.termInput:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.termBtn {
+  font-family: "Courier New", monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #00c8ff;
+  background: rgba(0, 180, 255, 0.08);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.termBtn:hover:not(:disabled) {
+  background: rgba(0, 180, 255, 0.16);
+  box-shadow: 0 0 16px rgba(0, 180, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.termBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.termBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.termMsg {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msgOk {
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.07);
+  border-color: rgba(46, 204, 113, 0.3);
+  box-shadow: 0 0 12px rgba(46, 204, 113, 0.1);
+}
+
+.msgErr {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.07);
+  border-color: rgba(231, 76, 60, 0.3);
+  box-shadow: 0 0 12px rgba(231, 76, 60, 0.1);
+}
+
+.allSolvedBanner {
+  color: #2ecc71;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  opacity: 0.5;
+}
+
+.allSolvedText {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #2ecc71;
+  text-align: center;
+  text-shadow: 0 0 18px rgba(46, 204, 113, 0.6);
+  padding: 6px 0;
+}
+
+.grantedPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 0 10px;
+  animation: fadeIn 0.4s ease;
+}
+
+.grantedIcon {
+  font-size: 2rem;
+}
+
+.grantedTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  color: #2ecc71;
+  text-shadow: 0 0 20px rgba(46, 204, 113, 0.7);
+}
+
+.grantedSub {
+  font-size: 0.78rem;
+  color: #2ecc71;
+  letter-spacing: 3px;
+  opacity: 0.65;
+}
+
+.cursorLine {
+  margin-top: 10px;
+  height: 16px;
+}
+
+.cursorOn {
+  color: #00c8ff;
+  font-size: 0.85rem;
+  opacity: 1;
+}
+
+.cursorOff {
+  color: #00c8ff;
+  font-size: 0.85rem;
+  opacity: 0;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 12px 48px;
+  }
+
+  .terminal {
+    padding: 20px 16px;
+    font-size: 0.8rem;
+  }
+
+  .title {
+    font-size: 1.1rem;
+  }
+
+  .termInput {
+    width: 90px;
+  }
+
+  .inputRow {
+    flex-wrap: wrap;
+  }
+
+  .termBtn {
+    padding: 10px 14px;
+  }
+
+  .reqBinary {
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+  }
+
+  .metaRow {
+    align-items: flex-start;
+  }
+}

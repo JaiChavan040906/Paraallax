@@ -6,38 +6,7 @@ import Session from "@/models/Session";
 import Team from "@/models/Team";
 import Puzzle from "@/models/Puzzle";
 
-// Fisher-Yates shuffle with better entropy
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-// Deck-deal: deal Y puzzles per team from a shuffled pool and shuffle per-team sequence
-function dealPuzzles(allPuzzleIds, teams, puzzlesPerTeam) {
-  const assignments = {};
-  // Shuffle the entire pool once at start for diversity
-  let shuffledPool = shuffle(allPuzzleIds);
-  let deckIdx = 0;
-
-  for (const teamName of teams) {
-    const teamPuzzles = [];
-    while (teamPuzzles.length < puzzlesPerTeam) {
-      if (deckIdx >= shuffledPool.length) {
-        // Reshuffle the pool for second pass
-        shuffledPool = shuffle(allPuzzleIds);
-        deckIdx = 0;
-      }
-      teamPuzzles.push(shuffledPool[deckIdx++]);
-    }
-    // Shuffle each team's own list so sequence differs even if sets overlap
-    assignments[teamName] = shuffle(teamPuzzles);
-  }
-  return assignments;
-}
+import { dealDomainPuzzles } from "@/lib/puzzleAssigner";
 
 export async function POST(req) {
   try {
@@ -55,19 +24,20 @@ export async function POST(req) {
     const waitingTeams = await Team.find({ status: "waiting" }).lean();
     const teamNames = waitingTeams.map((t) => t.teamName);
 
-    // Fetch all puzzles from the flat pool
-    const allPuzzles = await Puzzle.find({}, "puzzleId").lean();
-    const allPuzzleIds = allPuzzles.map((p) => p.puzzleId);
+    // Fetch all puzzles 
+    const allPuzzles = await Puzzle.find({}, "puzzleId type").lean();
 
-    if (allPuzzleIds.length < (puzzlesPerTeam || 1)) {
+
+    if (allPuzzles.length < (puzzlesPerTeam || 1)) {
       return NextResponse.json(
-        { error: `Not enough puzzles in DB. Need ${puzzlesPerTeam}, have ${allPuzzleIds.length}` },
+        { error: `Not enough puzzles in DB. Need ${puzzlesPerTeam}, have ${allPuzzles.length}` },
         { status: 400 },
       );
     }
 
     // Create session document and assignments. We'll attempt a transaction first.
-    const assignments = dealPuzzles(allPuzzleIds, teamNames, puzzlesPerTeam || 5);
+    const assignments = dealDomainPuzzles(allPuzzles, teamNames);
+
     const startTime = new Date();
 
     const sessionDoc = new Session({
