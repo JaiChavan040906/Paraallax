@@ -3,24 +3,17 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './Game2Handshake.module.css';
 
-// Function to dynamically generate codes that satisfy exactly 0 or 1 conditions.
+// Generate a code that satisfies exactly 0 or 1 conditions.
 const generateCodeForSet = () => {
-    let hexVal;
-    let codeStr;
-    let actionA = false;
-    let actionS = false;
-
+    let hexVal, codeStr, actionA, actionS;
     do {
-        hexVal = Math.floor(Math.random() * 256);
+        hexVal  = Math.floor(Math.random() * 256);
         codeStr = '0x' + hexVal.toString(16).toUpperCase().padStart(2, '0');
-        actionA = false;
-        actionS = false;
-
         // Set 2 (Beta):
         const d1 = parseInt(codeStr[2], 16);
         const d2 = parseInt(codeStr[3], 16);
-        if (d1 + d2 > 15) actionA = true;
-        if (codeStr[2] === codeStr[3]) actionS = true;
+        actionA  = (d1 + d2) > 15;
+        actionS  = codeStr[2] === codeStr[3];
     } while (actionA && actionS);
 
     let correctAction = 'IGNORE';
@@ -30,53 +23,55 @@ const generateCodeForSet = () => {
     return { code: codeStr, correctAction };
 };
 
-
-const TARGET_SCORE = 10;
-const CYCLE_TIME_MS = 2500;
+const TARGET_SCORE   = 10;
+const CYCLE_TIME_MS  = 2500;
 
 export default function Game2Set2({ puzzle, onSubmit, submitting }) {
-    
-    const [logs, setLogs] = useState([]);
-    const [progress, setProgress] = useState(0);
-    const [flashState, setFlashState] = useState('none');
+
+    const [logs,         setLogs]         = useState([]);
+    const [progress,     setProgress]     = useState(0);
+    const [flashState,   setFlashState]   = useState('none');
     const [isGameActive, setIsGameActive] = useState(false);
-    const [isComplete, setIsComplete] = useState(false);
-    const [zeroScoreCount, setZeroScoreCount] = useState(0);
+    const [isComplete,   setIsComplete]   = useState(false);
 
-    const logsRef = useRef(logs);
-    const progressRef = useRef(progress);
-    const isGameActiveRef = useRef(isGameActive);
+    // ── Stable refs so callbacks never become stale ───────────────────────────
+    const logsRef           = useRef([]);
+    const progressRef       = useRef(0);
+    const isGameActiveRef   = useRef(false);
+    const isCompleteRef     = useRef(false);
     const currentEntryIdRef = useRef(0);
-    const timerRef = useRef(null);
+    const timerRef          = useRef(null);
+    const penaltyCountRef   = useRef(0);   // replaces zeroScoreCount state
 
-    // Sync refs
-    useEffect(() => { logsRef.current = logs; }, [logs]);
-    useEffect(() => { progressRef.current = progress; }, [progress]);
+    // Keep refs in sync with state
+    useEffect(() => { logsRef.current = logs; },               [logs]);
+    useEffect(() => { progressRef.current = progress; },       [progress]);
     useEffect(() => { isGameActiveRef.current = isGameActive; }, [isGameActive]);
+    useEffect(() => { isCompleteRef.current = isComplete; },   [isComplete]);
 
-    const triggerFlash = (type) => {
+    // ── Stable flash helper ───────────────────────────────────────────────────
+    const triggerFlash = useCallback((type) => {
         setFlashState(type);
         setTimeout(() => setFlashState('none'), 300);
-    };
+    }, []);
 
+    // ── Failure handler — reads refs so it never goes stale ──────────────────
     const handleFailure = useCallback(() => {
         triggerFlash('error');
-        const prevProgress = progressRef.current;
-        const newProgress = Math.max(0, prevProgress - 2);
-        setProgress(newProgress);
-        
-        if (prevProgress > 0 && newProgress === 0) {
-            setZeroScoreCount(prev => {
-                const next = prev + 1;
-                if (next % 2 === 0) {
-                    fetch("/api/team/add-penalty", { 
-                        method: "POST" 
-                    });
-                }
-                return next;
-            });
+
+        const prev    = progressRef.current;
+        const newProg = Math.max(0, prev - 2);
+        progressRef.current = newProg;
+        setProgress(newProg);
+
+        if (prev > 0 && newProg === 0) {
+            penaltyCountRef.current += 1;
+            if (penaltyCountRef.current % 2 === 0) {
+                fetch("/api/team/add-penalty", { method: "POST" });
+            }
         }
-        // Mark the active one as missed if it was pending
+
+        // Mark last pending log as missed
         setLogs(prev => prev.map((log, idx) =>
             idx === prev.length - 1 && log.status === 'pending'
                 ? { ...log, status: 'missed' }
@@ -84,99 +79,117 @@ export default function Game2Set2({ puzzle, onSubmit, submitting }) {
         ));
     }, [triggerFlash]);
 
+    // ── Spawn a new code entry ────────────────────────────────────────────────
     const spawnNewCode = useCallback(() => {
         if (!isGameActiveRef.current) return;
 
+        // If last code is still pending, the player missed it → failure
         const currentLogs = logsRef.current;
         if (currentLogs.length > 0) {
-            const lastLog = currentLogs[currentLogs.length - 1];
-            if (lastLog.status === 'pending') {
-                // User did not act in time — always a failure, even for IGNORE codes
+            const last = currentLogs[currentLogs.length - 1];
+            if (last.status === 'pending') {
                 handleFailure();
             }
         }
 
-        const newDef = generateCodeForSet();
+        const newDef   = generateCodeForSet();
         const newEntry = {
-            id: currentEntryIdRef.current++,
+            id:      currentEntryIdRef.current++,
             codeDef: newDef,
-            status: 'pending'
+            status:  'pending',
         };
 
         setLogs(prev => {
             const maxLogs = 5;
-            const newLogs = [...prev, newEntry];
-            if (newLogs.length > maxLogs) return newLogs.slice(newLogs.length - maxLogs);
-            return newLogs;
+            const next    = [...prev, newEntry];
+            return next.length > maxLogs ? next.slice(next.length - maxLogs) : next;
         });
-
     }, [handleFailure]);
 
-    const startGame = () => {
-        setIsGameActive(true);
-        setIsComplete(false);
-        setProgress(0);
-        setLogs([]);
-        currentEntryIdRef.current = 0;
-        setFlashState('none');
-    };
+    // ── Keep a stable ref to spawnNewCode for the interval ───────────────────
+    const spawnRef = useRef(spawnNewCode);
+    useEffect(() => { spawnRef.current = spawnNewCode; }, [spawnNewCode]);
 
+    // ── Start / stop the spawn interval ──────────────────────────────────────
     useEffect(() => {
         if (isGameActive) {
-            spawnNewCode(); // initial spawn
-            timerRef.current = setInterval(spawnNewCode, CYCLE_TIME_MS);
-        } else if (timerRef.current) {
-            clearInterval(timerRef.current);
+            // Call immediately so first code shows at once
+            spawnRef.current();
+            timerRef.current = setInterval(() => spawnRef.current(), CYCLE_TIME_MS);
+        } else {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
         }
-
         return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
         };
-    }, [isGameActive, spawnNewCode]);
+    }, [isGameActive]); // only depends on isGameActive — stable
 
+    // ── Start game ───────────────────────────────────────────────────────────
+    const startGame = () => {
+        penaltyCountRef.current     = 0;
+        progressRef.current         = 0;
+        logsRef.current             = [];
+        currentEntryIdRef.current   = 0;
+        setProgress(0);
+        setLogs([]);
+        setFlashState('none');
+        setIsComplete(false);
+        setIsGameActive(true);
+    };
+
+    // ── Player action ────────────────────────────────────────────────────────
     const handleAction = useCallback((action) => {
-        if (!isGameActive) return;
+        if (!isGameActiveRef.current) return;
 
         const currentLogs = logsRef.current;
         if (currentLogs.length === 0) return;
 
         const lastLog = currentLogs[currentLogs.length - 1];
-
-        // Prevent double actions
-        if (lastLog.status !== 'pending') return;
+        if (lastLog.status !== 'pending') return;   // already actioned
 
         if (action === lastLog.codeDef.correctAction) {
             const newProgress = progressRef.current + 1;
+            progressRef.current = newProgress;
             setProgress(newProgress);
             triggerFlash('success');
-            setLogs(prev => prev.map(l => l.id === lastLog.id ? { ...l, status: 'correct' } : l));
+            setLogs(prev => prev.map(l =>
+                l.id === lastLog.id ? { ...l, status: 'correct' } : l
+            ));
 
             if (newProgress >= TARGET_SCORE) {
+                isGameActiveRef.current = false;
                 setIsGameActive(false);
                 setIsComplete(true);
                 setTimeout(() => onSubmit("Solved"), 2000);
             }
         } else {
             handleFailure();
-            setLogs(prev => prev.map(l => l.id === lastLog.id ? { ...l, status: 'incorrect' } : l));
+            setLogs(prev => prev.map(l =>
+                l.id === lastLog.id ? { ...l, status: 'incorrect' } : l
+            ));
         }
-    }, [isGameActive, handleFailure]);
+    }, [triggerFlash, handleFailure, onSubmit]);
 
-    // Keyboard controls
+    // ── Keyboard controls ────────────────────────────────────────────────────
     useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (!isGameActive) return;
-            const key = e.key.toLowerCase();
-            if (key === 'a') handleAction('A');
-            if (key === 's') handleAction('S');
-            if (key === 'i') handleAction('IGNORE');
+        const onKey = (e) => {
+            if (!isGameActiveRef.current) return;
+            const k = e.key.toLowerCase();
+            if (k === 'a') handleAction('A');
+            if (k === 's') handleAction('S');
+            if (k === 'i') handleAction('IGNORE');
         };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [handleAction]);
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isGameActive, handleAction]);
-
-    
+    // ── Render ───────────────────────────────────────────────────────────────
     return (
         <div className={`${styles.container} ${flashState === 'error' ? styles.shakeError : ''}`}>
 
@@ -184,7 +197,12 @@ export default function Game2Set2({ puzzle, onSubmit, submitting }) {
                 <div className={styles.terminalHeader}>
                     <h2>THE HANDSHAKE PROXY</h2>
                     <div className={styles.status}>
-                        PROTOCOL BETA | STATUS: {isComplete ? <span className={styles.statusSuccess}>VERIFIED</span> : isGameActive ? <span className={styles.statusActive}>INTERCEPTING</span> : <span className={styles.statusIdle}>STANDBY</span>}
+                        PROTOCOL BETA | STATUS:{' '}
+                        {isComplete
+                            ? <span className={styles.statusSuccess}>VERIFIED</span>
+                            : isGameActive
+                                ? <span className={styles.statusActive}>INTERCEPTING</span>
+                                : <span className={styles.statusIdle}>STANDBY</span>}
                     </div>
                 </div>
 
@@ -225,17 +243,23 @@ export default function Game2Set2({ puzzle, onSubmit, submitting }) {
                             const isLatest = index === logs.length - 1;
 
                             let statusIcon = '...';
-                            let rowClass = '';
+                            let rowClass   = '';
 
-                            if (log.status === 'correct') { statusIcon = '[OK]'; rowClass = styles.logSuccess; }
-                            if (log.status === 'incorrect' || log.status === 'missed') { statusIcon = '[ERR]'; rowClass = styles.logError; }
+                            if (log.status === 'correct') {
+                                statusIcon = '[OK]';
+                                rowClass   = styles.logSuccess;
+                            }
+                            if (log.status === 'incorrect' || log.status === 'missed') {
+                                statusIcon = '[ERR]';
+                                rowClass   = styles.logError;
+                            }
 
                             return (
                                 <div
                                     key={log.id}
                                     className={`${styles.logEntry} ${isOldest ? styles.fadeOut : ''} ${rowClass} ${isLatest && log.status === 'pending' ? styles.activeLog : ''}`}
                                 >
-                                    <span className={styles.logTimestamp}>{'>'} SYNC_{log.id.toString().padStart(4, '0')}</span>
+                                    <span className={styles.logTimestamp}>{`> SYNC_${log.id.toString().padStart(4, '0')}`}</span>
                                     <span className={styles.logCode}>{log.codeDef.code}</span>
                                     <span className={styles.logStatus}>{statusIcon}</span>
                                 </div>

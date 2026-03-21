@@ -187,6 +187,10 @@ export default function AdminDashboard() {
       setMsg("Select at least one team to allow.");
       return;
     }
+    if (!session || session.status !== 'started') {
+      setMsg("⚠ No active session! Start a session first, then allow teams.");
+      return;
+    }
     setLoading(true);
     setMsg("");
     try {
@@ -199,7 +203,7 @@ export default function AdminDashboard() {
       if (!res.ok) {
         setMsg("Error: " + (data.error || "Failed to approve"));
       } else {
-        setMsg(`✓ Approved ${data.approved?.length || 0} team(s)`);
+        setMsg(`✓ Approved ${data.approved?.length || 0} team(s) — they will be redirected within 1 second.`);
         setApprovedNames([]);
         fetchData();
       }
@@ -226,7 +230,7 @@ export default function AdminDashboard() {
             PARAALLAX — ADMIN
           </div>
           <div className="text-terminal-muted text-xs uppercase tracking-wider">
-            Control Panel · Polling every 10s
+            Control Panel · Live polling every 1s
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -292,13 +296,20 @@ export default function AdminDashboard() {
               </div>
             )}
             {waitingTeams.length > 0 && (
-              <button
-                onClick={approveTeams}
-                disabled={loading || approvedNames.length === 0}
-                className="btn-amber w-full mt-3 disabled:opacity-30"
-              >
-                {loading ? "ALLOWING..." : `✔ ALLOW SELECTED (${approvedNames.length})`}
-              </button>
+              <>
+                {(!session || session.status !== 'started') && (
+                  <div className="text-terminal-amber text-xs mt-2 px-2 py-1 border border-terminal-amber/30 rounded">
+                    ⚠ Start a session first before allowing teams.
+                  </div>
+                )}
+                <button
+                  onClick={approveTeams}
+                  disabled={loading || approvedNames.length === 0}
+                  className="btn-amber w-full mt-3 disabled:opacity-30"
+                >
+                  {loading ? "ALLOWING..." : `✔ ALLOW SELECTED (${approvedNames.length})`}
+                </button>
+              </>
             )}
             <p className="text-terminal-muted text-xs mt-2">
               Tick teams and click Allow to send them into the game.

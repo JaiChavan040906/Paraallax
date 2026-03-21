@@ -31,7 +31,7 @@ export default function WaitingPage() {
           return;
         }
         const data = await res.json();
-        if (data.status === "playing" || data.shouldRedirect === "/team/game") {
+        if (data.status === "playing" || data.status === "loading" || data.shouldRedirect === "/team/game") {
           router.push("/team/game");
         } else if (data.status === "success") {
           router.push("/team/success");
