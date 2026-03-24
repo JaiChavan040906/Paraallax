@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Paraallax — Penalty System Guide</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap');
+
+    :root {
+      --bg:         #080c14;
+      --surface:    #0d1520;
+      --border:     #1a2d48;
+      --accent:     #00d4ff;
+      --accent2:    #7c3aed;
+      --green:      #00ff88;
+      --red:        #ff3c5f;
+      --yellow:     #ffd166;
+      --orange:     #ff8c42;
+      --text:       #c8d8e8;
+      --dim:        #5a7a9a;
+      --white:      #f0f8ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* ── COVER PAGE ───────────────────────────────────────────── */
+    .cover {
+      width: 210mm;
+      min-height: 297mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #060a12 0%, #0d1a2e 50%, #110820 100%);
+      padding: 40px;
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(0,212,255,0.04) 29px),
+        repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(0,212,255,0.04) 29px);
+    }
+
+    .cover-corner {
+      position: absolute;
+      width: 80px; height: 80px;
+      border-color: var(--accent);
+      border-style: solid;
+      opacity: 0.5;
+    }
+    .cover-corner.tl { top: 30px; left: 30px; border-width: 3px 0 0 3px; }
+    .cover-corner.tr { top: 30px; right: 30px; border-width: 3px 3px 0 0; }
+    .cover-corner.bl { bottom: 30px; left: 30px; border-width: 0 0 3px 3px; }
+    .cover-corner.br { bottom: 30px; right: 30px; border-width: 0 3px 3px 0; }
+
+    .cover-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 5px 16px;
+      margin-bottom: 36px;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .cover-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      color: var(--white);
+      text-align: center;
+      letter-spacing: 3px;
+      line-height: 1.15;
+      margin-bottom: 12px;
+      text-shadow: 0 0 40px rgba(0,212,255,0.4);
+    }
+
+    .cover-title span {
+      color: var(--accent);
+    }
+
+    .cover-subtitle {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      color: var(--dim);
+      letter-spacing: 6px;
+      text-align: center;
+      margin-bottom: 48px;
+      text-transform: uppercase;
+    }
+
+    .cover-divider {
+      width: 180px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      margin: 0 auto 48px;
+    }
+
+    .cover-doc-info {
+      display: flex;
+      gap: 40px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+
+    .cover-doc-info div { text-align: center; }
+    .cover-doc-info div strong { display: block; color: var(--accent); font-size: 13px; margin-bottom: 4px; }
+
+    .cover-warning {
+      position: absolute;
+      bottom: 50px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--red);
+      letter-spacing: 3px;
+      text-align: center;
+      padding: 8px 20px;
+      border: 1px solid rgba(255,60,95,0.4);
+    }
+
+    /* ── PAGES ───────────────────────────────────────────────── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 18mm 18mm 20mm;
+      background: var(--bg);
+      page-break-after: always;
+      position: relative;
+    }
+
+    /* ── PAGE HEADER ─────────────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 26px;
+    }
+
+    .page-header-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 3px;
+    }
+
+    .page-header-right {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 2px;
+    }
+
+    /* ── SECTION HEADING ─────────────────────────────────────── */
+    .section-heading {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 18px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-heading .icon {
+      font-size: 18px;
+    }
+
+    .section-heading .num {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 2px 7px;
+    }
+
+    /* ── INTRO BLOCK ─────────────────────────────────────────── */
+    .intro-block {
+      background: rgba(0,212,255,0.04);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-left: 3px solid var(--accent);
+      padding: 14px 18px;
+      margin-bottom: 22px;
+      font-size: 12.5px;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .intro-block p + p { margin-top: 8px; }
+
+    /* ── PENALTY SUMMARY TABLE ───────────────────────────────── */
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11.5px;
+    }
+
+    .summary-table thead tr {
+      background: rgba(124,58,237,0.25);
+    }
+
+    .summary-table th {
+      padding: 9px 12px;
+      text-align: left;
+      color: var(--accent);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(26,45,72,0.7);
+      vertical-align: top;
+      color: var(--text);
+    }
+
+    .summary-table tr:hover td {
+      background: rgba(0,212,255,0.03);
+    }
+
+    .td-game {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--white);
+      white-space: nowrap;
+    }
+
+    .td-trigger { color: var(--yellow); }
+    .td-penalty { color: var(--red); font-weight: 700; }
+    .td-note    { color: var(--dim); font-size: 10.5px; }
+
+    /* ── GAME CARDS ──────────────────────────────────────────── */
+    .game-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 22px;
+      overflow: hidden;
+    }
+
+    .game-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: linear-gradient(90deg, rgba(124,58,237,0.2) 0%, rgba(0,212,255,0.06) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .game-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent2);
+      background: rgba(124,58,237,0.2);
+      border: 1px solid var(--accent2);
+      padding: 3px 8px;
+      flex-shrink: 0;
+    }
+
+    .game-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+      flex: 1;
+    }
+
+    .game-sets {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--dim);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+    }
+
+    .game-card-body {
+      padding: 14px 16px;
+    }
+
+    .penalty-row {
+      display: grid;
+      grid-template-columns: 18px 1fr 120px;
+      gap: 10px;
+      align-items: start;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(26,45,72,0.5);
+    }
+
+    .penalty-row:last-child { border-bottom: none; }
+
+    .penalty-bullet {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+
+    .penalty-bullet.red { background: var(--red); }
+    .penalty-bullet.yellow { background: var(--yellow); }
+    .penalty-bullet.orange { background: var(--orange); }
+
+    .penalty-desc {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .penalty-desc strong {
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    .penalty-desc .code {
+      font-family: 'Share Tech Mono', monospace;
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      padding: 1px 5px;
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    .penalty-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .tag-red    { color: var(--red); }
+    .tag-orange { color: var(--orange); }
+    .tag-yellow { color: var(--yellow); }
+
+    .game-mechanic-note {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.3);
+      border-left: 2px solid var(--accent2);
+      font-size: 11px;
+      color: var(--dim);
+      font-family: 'Share Tech Mono', monospace;
+      line-height: 1.6;
+    }
+
+    /* ── HOW PENALTY WORKS BOX ───────────────────────────────── */
+    .mechanism-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .mech-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 14px;
+    }
+
+    .mech-box-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mech-box ul {
+      list-style: none;
+      font-size: 11.5px;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .mech-box ul li::before {
+      content: '▶ ';
+      color: var(--accent);
+      font-size: 9px;
+    }
+
+    .mech-box ul li strong { color: var(--white); }
+
+    /* ── SCORE FORMULA ───────────────────────────────────────── */
+    .formula-box {
+      background: rgba(124,58,237,0.08);
+      border: 1px solid rgba(124,58,237,0.4);
+      padding: 16px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .formula-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 15px;
+      color: var(--white);
+      letter-spacing: 2px;
+    }
+
+    .formula-text .op { color: var(--accent); }
+    .formula-text .neg { color: var(--red); }
+    .formula-text .pos { color: var(--green); }
+
+    .formula-caption {
+      font-size: 11px;
+      color: var(--dim);
+      margin-top: 8px;
+    }
+
+    /* ── TIPS BOX ────────────────────────────────────────────── */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .tip-box {
+      border: 1px solid var(--border);
+      padding: 12px;
+    }
+
+    .tip-box.good { border-left: 3px solid var(--green); }
+    .tip-box.bad  { border-left: 3px solid var(--red); }
+
+    .tip-box-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9.5px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .tip-box.good .tip-box-title { color: var(--green); }
+    .tip-box.bad  .tip-box-title { color: var(--red); }
+
+    .tip-box ul {
+      list-style: none;
+      font-size: 11.5px;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .tip-box.good ul li::before { content: '✓ '; color: var(--green); }
+    .tip-box.bad  ul li::before { content: '✗ '; color: var(--red); }
+
+    /* ── GLOSSARY ────────────────────────────────────────────── */
+    .glossary-row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(26,45,72,0.5);
+      align-items: start;
+    }
+
+    .glossary-row:last-child { border-bottom: none; }
+
+    .glossary-term {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    .glossary-def {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* ── PAGE FOOTER ─────────────────────────────────────────── */
+    .page-footer {
+      position: absolute;
+      bottom: 12mm;
+      left: 18mm; right: 18mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 6px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: var(--dim);
+      letter-spacing: 1.5px;
+    }
+
+    /* ── PRINT ───────────────────────────────────────────────── */
+    @media print {
+      body { background: #080c14; }
+      .page, .cover { page-break-after: always; }
+      @page { size: A4; margin: 0; }
+    }
+
+    /* ── HIGHLIGHT ───────────────────────────────────────────── */
+    .hl-cyan   { color: var(--accent); }
+    .hl-red    { color: var(--red); }
+    .hl-green  { color: var(--green); }
+    .hl-yellow { color: var(--yellow); }
+    .hl-purple { color: #a78bfa; }
+
+    .mono { font-family: 'Share Tech Mono', monospace; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════ COVER PAGE ══════════════════════ -->
+<div class="cover">
+  <div class="cover-corner tl"></div>
+  <div class="cover-corner tr"></div>
+  <div class="cover-corner bl"></div>
+  <div class="cover-corner br"></div>
+
+  <div class="cover-badge">PARAALLAX OFFICIAL DOCUMENTATION</div>
+
+  <div class="cover-title">PENALTY<br><span>SYSTEM</span><br>GUIDE</div>
+  <div class="cover-subtitle">Complete Reference for All Game Types</div>
+  <div class="cover-divider"></div>
+
+  <div class="cover-doc-info">
+    <div><strong>VERSION</strong>v1.0</div>
+    <div><strong>GAMES</strong>7 Modules</div>
+    <div><strong>AUDIENCE</strong>Players</div>
+    <div><strong>STATUS</strong>Active</div>
+  </div>
+
+  <div class="cover-warning">⚠ PLAYER MANUAL — PENALTY RULES ARE ENFORCED IN REAL TIME ⚠</div>
+</div>
+
+<!-- ══════════════════════ PAGE 1: OVERVIEW ══════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-logo">PARAALLAX</div>
+    <div class="page-header-right">PENALTY SYSTEM GUIDE · PAGE 1</div>
+  </div>
+
+  <div class="section-heading">
+    <span class="icon">📋</span>
+    <span class="num">00</span>
+    INTRODUCTION &amp; OVERVIEW
+  </div>
+
+  <div class="intro-block">
+    <p>
+      The <strong>Paraallax Penalty System</strong> is an integral part of the game experience.
+      Every mistake you make across all 7 puzzle modules adds time to your team's
+      total penalty counter, which is deducted from your final score when the session ends.
+    </p>
+    <p>
+      Penalties are applied <strong>instantly and in real time</strong> — the moment a wrong action is taken,
+      the server records the penalty. There are <strong>no warnings</strong> before the penalty fires,
+      and they <strong>cannot be undone</strong>. Understanding exactly what triggers a penalty in
+      each game is therefore critical to achieving a top score.
+    </p>
+    <p>
+      This manual documents every penalty trigger, its mechanism, and the exact amount added
+      to your team's penalty counter for each of the 7 game types in Paraallax.
+    </p>
+  </div>
+
+  <div class="section-heading" style="margin-top:8px;">
+    <span class="icon">⚙️</span>
+    <span class="num">01</span>
+    HOW PENALTIES WORK
+  </div>
+
+  <div class="mechanism-grid">
+    <div class="mech-box">
+      <div class="mech-box-title">PENALTY ACCUMULATION</div>
+      <ul>
+        <li>Penalties are tracked per <strong>team</strong></li>
+        <li>They accumulate in <strong>seconds</strong></li>
+        <li>Each trigger adds a fixed <strong>penalty block</strong></li>
+        <li>Default block = <strong>5 minutes (300s)</strong></li>
+        <li>Admin can configure penalty time</li>
+        <li>Penalties stack with no upper limit</li>
+      </ul>
+    </div>
+    <div class="mech-box">
+      <div class="mech-box-title">PENALTY CALCULATION</div>
+      <ul>
+        <li>The <strong>Session</strong> holds <code>penaltyMinutes</code></li>
+        <li>Default session penalty = <strong>5 min / event</strong></li>
+        <li>API endpoint: <strong>POST /api/team/add-penalty</strong></li>
+        <li>Penalty is added to <strong>team.penaltySeconds</strong></li>
+        <li>Displayed on admin dashboard in real time</li>
+        <li>Included in the final results page</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-text">
+      <span class="pos">Final Score</span>
+      <span class="op"> = </span>
+      <span class="pos">Puzzles Solved</span>
+      <span class="op"> − </span>
+      <span class="neg">Total Penalty Seconds</span>
+    </div>
+    <div class="formula-caption">
+      Lower penalty seconds = better rank. Each wrong action adds penalty time to your total.
+    </div>
+  </div>
+
+  <!-- Quick-Reference Summary Table -->
+  <div class="section-heading">
+    <span class="icon">🗂️</span>
+    <span class="num">02</span>
+    QUICK-REFERENCE PENALTY SUMMARY
+  </div>
+
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>GAME MODULE</th>
+        <th>SETS</th>
+        <th>PENALTY TRIGGER</th>
+        <th>PENALTY PER EVENT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="td-game">GAME 1 — Power Grid</td>
+        <td class="mono">3</td>
+        <td class="td-trigger">All 4 gates placed but circuit is wrong</td>
+        <td class="td-penalty">1× penalty block</td>
+      </tr>
+      <tr>
+        <td class="td-game">GAME 2 — Handshake Protocol</td>
+        <td class="mono">2</td>
+        <td class="td-trigger">Progress drops to 0 for every 2nd failure</td>
+        <td class="td-penalty">1× penalty block</td>
+      </tr>
+      <tr>
+        <td class="td-game">GAME 3 — Database Schema</td>
+        <td class="mono">3</td>
+        <td class="td-trigger">Wrong/incomplete SQL query submitted</td>
+        <td class="td-penalty">1× penalty block</td>
+      </tr>
+      <tr>
+        <td class="td-game">GAME 4 — The Firewall</td>
+        <td class="mono">3</td>
+        <td class="td-trigger">Wrong move (−15s local) OR time runs out</td>
+        <td class="td-penalty">1× penalty block (timeout only)</td>
+      </tr>
+      <tr>
+        <td class="td-game">GAME 5 — OS Deadlock</td>
+        <td class="mono">3</td>
+        <td class="td-trigger">Wrong kill command OR invalid command</td>
+        <td class="td-penalty">1× penalty block</td>
+      </tr>
+      <tr>
+        <td class="td-game">GAME 6 — Dynamic Cipher Grid</td>
+        <td class="mono">3</td>
+        <td class="td-trigger">Wrong cipher answer submitted</td>
+        <td class="td-penalty">1× penalty block</td>
+      </tr>
+      <tr>
+        <td class="td-game">GAME 7 — Memory Access System</td>
+        <td class="mono">3</td>
+        <td class="td-trigger">Wrong request output OR wrong final answer</td>
+        <td class="td-penalty">1× penalty block</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>PARAALLAX — PENALTY SYSTEM GUIDE</span>
+    <span>CONFIDENTIAL · PLAYER MANUAL</span>
+    <span>PAGE 01</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 2: GAME 1 & 2 ══════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-logo">PARAALLAX</div>
+    <div class="page-header-right">PENALTY SYSTEM GUIDE · PAGE 2</div>
+  </div>
+
+  <!-- GAME 1 -->
+  <div class="section-heading">
+    <span class="icon">⚡</span>
+    <span class="num">G1</span>
+    GAME 1 — THE POWER GRID
+  </div>
+
+  <div class="game-card">
+    <div class="game-card-header">
+      <span class="game-number">GAME 01</span>
+      <span class="game-title">The Power Grid</span>
+      <span class="game-sets">3 SETS · Grid Alpha / Beta / Gamma</span>
+    </div>
+    <div class="game-card-body">
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Trigger:</strong> All four gate slots (Z1, Z2, Z3, Z4) have been filled with logic gates,
+          <em>but the final output node does not produce a <span class="code">TRUE</span> signal</em>.
+          The circuit is evaluated live and the penalty fires automatically the moment a
+          complete-but-wrong configuration is detected.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>BLOCK ADDED</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet yellow"></div>
+        <div class="penalty-desc">
+          <strong>One-shot protection:</strong> A state flag (<span class="code">hasTriggeredPenalty</span>)
+          ensures the penalty fires only <em>once per complete wrong configuration</em>.
+          If you remove a gate and re-place it, the flag resets and another wrong
+          configuration will trigger another penalty.
+        </div>
+        <div class="penalty-tag tag-orange">⚠ RESETS ON<br>GATE REMOVAL</div>
+      </div>
+      <div class="game-mechanic-note">
+        MECHANIC: Four draggable gates (Δ AND · Σ OR · Φ XOR · Ψ NAND) must be arranged so
+        the full circuit produces TRUE at the output node. Each gate combination is checked
+        instantly. Removing a gate from any slot resets the error-guard, allowing repeated
+        experimenting — but each wrong complete arrangement costs one penalty block.
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME 2 -->
+  <div class="section-heading" style="margin-top: 6px;">
+    <span class="icon">🤝</span>
+    <span class="num">G2</span>
+    GAME 2 — THE HANDSHAKE PROTOCOL
+  </div>
+
+  <div class="game-card">
+    <div class="game-card-header">
+      <span class="game-number">GAME 02</span>
+      <span class="game-title">The Handshake Protocol</span>
+      <span class="game-sets">2 SETS · Protocol Alpha / Beta</span>
+    </div>
+    <div class="game-card-body">
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Wrong button press:</strong> Pressing the wrong action button
+          (<span class="code">ACTION A</span>, <span class="code">ACTION S</span>, or
+          <span class="code">IGNORE</span>) for the current hex code decreases your progress
+          bar by <strong>−2 points</strong> and marks the current code as <span class="code">[ERR]</span>.
+        </div>
+        <div class="penalty-tag tag-orange">−2 PROGRESS<br>NO PENALTY YET</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Missed code (timeout):</strong> Each code has a <strong>2.5-second window</strong>.
+          If the code expires without any action, it counts as a failure and progress drops by −2,
+          same as a wrong press.
+        </div>
+        <div class="penalty-tag tag-orange">−2 PROGRESS<br>NO PENALTY YET</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Penalty block trigger — the "wipe" rule:</strong> A penalty block is only sent to the
+          server when the progress counter is driven <em>from above 0 all the way back to 0</em>,
+          AND this happens for the <strong>2nd, 4th, 6th … (every even-numbered) wipe</strong>.
+          In other words: the internal <span class="code">penaltyCountRef</span> increments on each wipe,
+          and only fires a server penalty when that count is even
+          (<span class="code">penaltyCount % 2 === 0</span>).
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>EVERY 2ND WIPE</div>
+      </div>
+      <div class="game-mechanic-note">
+        MECHANIC: Codes scroll every 2.5 s. Reach 10 correct signatures to win.
+        Protocol Alpha (Set 1): ACTION A if hex % 7 == 0 · ACTION S if hex contains 'C' or 'D' · else IGNORE.
+        Protocol Beta (Set 2): ACTION A if (digit1 + digit2) &gt; 15 · ACTION S if both hex digits are equal · else IGNORE.
+        Keys: [A] = Action A · [S] = Action S · [I] = Ignore.
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>PARAALLAX — PENALTY SYSTEM GUIDE</span>
+    <span>GAMES 1 &amp; 2 DETAIL</span>
+    <span>PAGE 02</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 3: GAME 3 & 4 ══════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-logo">PARAALLAX</div>
+    <div class="page-header-right">PENALTY SYSTEM GUIDE · PAGE 3</div>
+  </div>
+
+  <!-- GAME 3 -->
+  <div class="section-heading">
+    <span class="icon">🗄️</span>
+    <span class="num">G3</span>
+    GAME 3 — DATABASE SCHEMA
+  </div>
+
+  <div class="game-card">
+    <div class="game-card-header">
+      <span class="game-number">GAME 03</span>
+      <span class="game-title">Database Schema</span>
+      <span class="game-sets">3 SETS · Emergency Override Console</span>
+    </div>
+    <div class="game-card-body">
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Missing SELECT or FROM keyword:</strong> If your typed query does not include
+          both the word <span class="code">select</span> and <span class="code">from</span>,
+          the system immediately rejects it with
+          <span class="code">ERROR 1064: SQL syntax error</span> and a penalty block fires.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>BLOCK ADDED</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Missing semicolon:</strong> Any query that includes SELECT and FROM but
+          <em>does not end with a semicolon</em> (<span class="code">;</span>) is rejected with a
+          syntax error and a penalty block is added.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>BLOCK ADDED</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Syntactically valid but wrong query:</strong> A query that is structurally
+          correct (has SELECT, FROM, ends with ';') but <em>does not match the expected answer</em>
+          receives the message <span class="code">ERROR 0000: QUERY EXECUTED BUT RETURNED NO MATCHING INCIDENT DATA</span>
+          and triggers a penalty block.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>BLOCK ADDED</div>
+      </div>
+      <div class="game-mechanic-note">
+        MECHANIC: Each set presents a different incident scenario. You must compose an exact SQL SELECT query
+        matching the expected query (case-insensitive, extra spaces ignored, single/double quotes are equivalent).
+        Read the incident prompt carefully — the table name, column names, and WHERE clause must all be correct.
+        Example Set 1 answer: <strong>select first_name, last_name from personnel where emp_id = 4091;</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME 4 -->
+  <div class="section-heading" style="margin-top: 6px;">
+    <span class="icon">🔥</span>
+    <span class="num">G4</span>
+    GAME 4 — THE FIREWALL
+  </div>
+
+  <div class="game-card">
+    <div class="game-card-header">
+      <span class="game-number">GAME 04</span>
+      <span class="game-title">The Firewall</span>
+      <span class="game-sets">3 SETS · Sector Alpha / Beta / Gamma · 7×7 Grid</span>
+    </div>
+    <div class="game-card-body">
+      <div class="penalty-row">
+        <div class="penalty-bullet orange"></div>
+        <div class="penalty-desc">
+          <strong>Wrong move (local penalty — in-game timer only):</strong>
+          Each incorrect directional move causes a <span class="code">COLLISION DETECTED</span>
+          event. The local countdown timer is <em>immediately reduced by
+          <strong>15 seconds</strong></em> and your position is <strong>reset to the start</strong>
+          after an 0.8-second stun. <em>No server penalty is added for individual wrong moves.</em>
+        </div>
+        <div class="penalty-tag tag-orange">⏱ −15 SECONDS<br>LOCAL TIMER ONLY</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Running out of time (timeout):</strong> If the 2-minute countdown (<strong>120 seconds</strong>)
+          reaches zero before you reach the target coordinate, the game ends in
+          <span class="code">CONNECTION TERMINATED</span>. At this point,
+          <strong>one full penalty block is added to the server</strong>. You may retry by clicking
+          "RETRY BREACH" — but each timeout costs a penalty block.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>ON TIMEOUT ONLY</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet yellow"></div>
+        <div class="penalty-desc">
+          <strong>Move logic (same for all 3 sets):</strong> At any position (X, Y), the valid move
+          is determined by: if <span class="code">(X+Y) is even</span> → move UP if X&lt;Y, else RIGHT.
+          If <span class="code">(X+Y) is odd</span> → move LEFT if X&lt;Y, else DOWN.
+          Any deviation triggers a collision and −15s.
+        </div>
+        <div class="penalty-tag tag-yellow">📐 RULE-BASED<br>MOVEMENT</div>
+      </div>
+      <div class="game-mechanic-note">
+        MECHANIC: Grid is 7×7. Controls via arrow keys or WASD or on-screen D-Pad.
+        The collision penalty (-15s) is visual and local only; it serves as your countdown punishment.
+        The server-side penalty block is only sent when the full timer expires (timeout = game failure).
+        Moves are throttled to 150ms intervals to prevent key-spam accidents.
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>PARAALLAX — PENALTY SYSTEM GUIDE</span>
+    <span>GAMES 3 &amp; 4 DETAIL</span>
+    <span>PAGE 03</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 4: GAME 5 & 6 ══════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-logo">PARAALLAX</div>
+    <div class="page-header-right">PENALTY SYSTEM GUIDE · PAGE 4</div>
+  </div>
+
+  <!-- GAME 5 -->
+  <div class="section-heading">
+    <span class="icon">💻</span>
+    <span class="num">G5</span>
+    GAME 5 — OS DEADLOCK
+  </div>
+
+  <div class="game-card">
+    <div class="game-card-header">
+      <span class="game-number">GAME 05</span>
+      <span class="game-title">OS Deadlock</span>
+      <span class="game-sets">3 SETS · PARALLAX OS v5.0 · Process Terminal</span>
+    </div>
+    <div class="game-card-body">
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Wrong kill target:</strong> Entering <span class="code">kill &lt;PID&gt;</span>
+          with a process ID that is <em>not the correct root blocker</em> prints
+          <span class="code">Incorrect process terminated ❌</span> and
+          <span class="code">Deadlock persists...</span>, and adds one penalty block.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>BLOCK ADDED</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Invalid command:</strong> Typing anything that is <em>not a recognised command</em>
+          (e.g. random text, typos, wrong syntax) prints <span class="code">Invalid command</span>
+          and immediately fires a penalty block.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>BLOCK ADDED</div>
+      </div>
+      <div class="game-mechanic-note">
+        MECHANIC: On startup the terminal auto-runs <strong>ps</strong> (process list), <strong>resource-map</strong>
+        (resource lock table), and <strong>waiting-list</strong> (blocked processes) commands.
+        Study the output: find which process holds the resource that is blocking the most other processes
+        (highest usage, most dependents). Then type: <strong>kill &lt;PID&gt;</strong>.
+        No other commands are needed — typing unrecognised commands wastes a penalty.
+        Set 1 answer: <strong>kill 344</strong> (CACHE_LOCK at 95% usage, blocking 2 processes).
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME 6 -->
+  <div class="section-heading" style="margin-top: 6px;">
+    <span class="icon">🔐</span>
+    <span class="num">G6</span>
+    GAME 6 — DYNAMIC CIPHER GRID
+  </div>
+
+  <div class="game-card">
+    <div class="game-card-header">
+      <span class="game-number">GAME 06</span>
+      <span class="game-title">Dynamic Cipher Grid</span>
+      <span class="game-sets">3 SETS · Cipher Decryption · Submit Final Word</span>
+    </div>
+    <div class="game-card-body">
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Wrong cipher answer submitted:</strong> Clicking the
+          <span class="code">SUBMIT</span> button (or pressing
+          <span class="code">Enter</span>) with an answer that does not match the
+          expected decoded word triggers <span class="code">❌ Access Denied</span> and
+          adds one penalty block. The input field shakes visually as feedback.
+          A new attempt is allowed immediately.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>EACH WRONG SUBMIT</td>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet yellow"></div>
+        <div class="penalty-desc">
+          <strong>No penalty for empty submission:</strong> Clicking Submit with an empty
+          input is blocked by the UI and does <em>not</em> trigger any penalty.
+        </div>
+        <div class="penalty-tag tag-yellow">✅ SAFE<br>EMPTY = BLOCKED</div>
+      </div>
+      <div class="game-mechanic-note">
+        MECHANIC: Each set shows a 3×3 grid of code cells (e.g., A1, C3, F2…), a sequence of those codes,
+        a SHIFT value, and a MODE (ALPHA). Follow the cipher steps from your game guide:
+        (1) look up each code in the grid to find its row/column letter, (2) apply the SHIFT value to
+        the alphabet, (3) assemble the decoded letters in sequence order. The answer is always a 5-letter word.
+        Input is case-insensitive (converted to uppercase on submission). Think carefully before submitting.
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>PARAALLAX — PENALTY SYSTEM GUIDE</span>
+    <span>GAMES 5 &amp; 6 DETAIL</span>
+    <span>PAGE 04</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 5: GAME 7 ══════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-logo">PARAALLAX</div>
+    <div class="page-header-right">PENALTY SYSTEM GUIDE · PAGE 5</div>
+  </div>
+
+  <!-- GAME 7 -->
+  <div class="section-heading">
+    <span class="icon">🧠</span>
+    <span class="num">G7</span>
+    GAME 7 — MULTI-REQUEST MEMORY ACCESS SYSTEM
+  </div>
+
+  <div class="game-card">
+    <div class="game-card-header">
+      <span class="game-number">GAME 07</span>
+      <span class="game-title">Multi-Request Memory Access System (MRMAS)</span>
+      <span class="game-sets">3 SETS · Alpha / Beta / Gamma · 2-Stage Puzzle</span>
+    </div>
+    <div class="game-card-body">
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Stage 1 — Wrong request output:</strong> Each set has 3 binary memory requests,
+          processed one at a time in order. Submitting the wrong decoded letter for the
+          <span class="code">PENDING</span> (active) request fires the message
+          <span class="code">✗ INVALID REQUEST OUTPUT</span> and adds one penalty block.
+          The same request remains active for retry — but each wrong attempt costs a penalty.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>EACH WRONG LETTER</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet red"></div>
+        <div class="penalty-desc">
+          <strong>Stage 2 — Wrong final assembly:</strong> After all 3 requests are
+          <span class="code">SOLVED</span>, you must assemble the 3 output letters in
+          the order specified by the <strong>Final Rule</strong> (e.g. 1st+3rd+2nd).
+          Submitting the wrong 3-letter word fires
+          <span class="code">✗ INVALID FINAL ASSEMBLY</span> and adds one penalty block.
+        </div>
+        <div class="penalty-tag tag-red">📡 +1 PENALTY<br>EACH WRONG FINAL</div>
+      </div>
+      <div class="penalty-row">
+        <div class="penalty-bullet yellow"></div>
+        <div class="penalty-desc">
+          <strong>Stage 1 is sequential — locked requests cannot be skipped:</strong>
+          Requests are locked until the previous one is solved. You can only interact with
+          the current PENDING request. Wrong answers for it still cost a penalty.
+        </div>
+        <div class="penalty-tag tag-yellow">🔒 SEQUENTIAL<br>ORDER ENFORCED</div>
+      </div>
+      <div class="game-mechanic-note">
+        MECHANIC: Stage 1 — each binary string (e.g. <strong>101101</strong>) must be decoded to a single letter
+        using the binary-to-letter mapping in your guide manual. Stage 2 — rearrange the 3 decoded letters
+        according to the Final Rule shown on screen (e.g. "1st + 3rd + 2nd").
+        Set Alpha example: REQ1=101101→R, REQ2=010010→M, REQ3=110100→A. Rule: 1st+3rd+2nd → "RAM".
+        Input is single-character for Stage 1 and 3-character for Stage 2. Both are case-insensitive.
+      </div>
+    </div>
+  </div>
+
+  <!-- TIPS SECTION -->
+  <div class="section-heading" style="margin-top: 14px;">
+    <span class="icon">🎯</span>
+    <span class="num">03</span>
+    STRATEGY &amp; TIPS
+  </div>
+
+  <div class="tips-grid">
+    <div class="tip-box good">
+      <div class="tip-box-title">✔ DO THIS</div>
+      <ul>
+        <li>Read all on-screen data before acting</li>
+        <li>In Game 6, solve the cipher offline first</li>
+        <li>In Game 4, memorise the movement rule before starting</li>
+        <li>In Game 2, stay calm — wrong keys still cost progress</li>
+        <li>In Game 3, always end your SQL with a semicolon</li>
+        <li>In Game 7, decode all 3 letters before assembling</li>
+        <li>Aim for zero wrong submissions in Game 6 &amp; 7</li>
+      </ul>
+    </div>
+    <div class="tip-box bad">
+      <div class="tip-box-title">✘ AVOID THIS</div>
+      <ul>
+        <li>Guessing randomly in Game 6 or 7 — every wrong submit costs</li>
+        <li>Running out of timer in Game 4 — each timeout = full penalty</li>
+        <li>Typos in Game 3 (missing semicolons, wrong table names)</li>
+        <li>Typing unrecognised commands in Game 5</li>
+        <li>Pressing wrong keys repeatedly in Game 2</li>
+        <li>Testing all gate combos blindly in Game 1</li>
+        <li>Not reading the Final Rule in Game 7 before assembling</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>PARAALLAX — PENALTY SYSTEM GUIDE</span>
+    <span>GAME 7 DETAIL &amp; TIPS</span>
+    <span>PAGE 05</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 6: GLOSSARY ══════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-logo">PARAALLAX</div>
+    <div class="page-header-right">PENALTY SYSTEM GUIDE · PAGE 6</div>
+  </div>
+
+  <div class="section-heading">
+    <span class="icon">📖</span>
+    <span class="num">04</span>
+    GLOSSARY OF TERMS
+  </div>
+
+  <div class="glossary-row">
+    <div class="glossary-term">Penalty Block</div>
+    <div class="glossary-def">A fixed amount of penalty time added to your team's total. Currently configured by the admin per session (default: 5 minutes = 300 seconds). One "block" is added per penalty event.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">penaltySeconds</div>
+    <div class="glossary-def">The running total of penalty time (in seconds) stored on your team's database record. This number increases with every penalty trigger and is never reduced during gameplay.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">penaltyMinutes</div>
+    <div class="glossary-def">The admin-controlled session setting that determines how many minutes are added per penalty event. Default is 5 minutes. The admin may change this before or during the event.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">Server Penalty</div>
+    <div class="glossary-def">A penalty that is permanently recorded in the database via POST /api/team/add-penalty. This is what counts toward your final score. Not all in-game "errors" trigger a server penalty.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">Local Penalty</div>
+    <div class="glossary-def">An in-game penalty that only affects the current puzzle's state (e.g., Game 4's −15 second timer reduction on wrong move). This does NOT add to your server-side penalty total.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">Progression Wipe</div>
+    <div class="glossary-def">In Game 2 (Handshake), when repeated wrong actions push the progress bar from above 0 all the way back to 0. A server penalty is only triggered on every 2nd wipe (i.e., count 2, 4, 6…).</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">hasTriggeredPenalty</div>
+    <div class="glossary-def">A guard flag in Game 1 that prevents the same wrong gate configuration from triggering multiple penalty events. It resets only when the team removes a gate from a slot.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">Collision (Game 4)</div>
+    <div class="glossary-def">Occurs in The Firewall when a player attempts a move that violates the protocol rule at their current position, or tries to move outside the 7×7 grid boundary. Costs −15s local timer.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">PENDING (Game 7)</div>
+    <div class="glossary-def">The status of the currently active memory request in Game 7. Only the PENDING request can be answered. Correctly answering it unlocks the next LOCKED request.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">finalPenalty</div>
+    <div class="glossary-def">The total penalty seconds recorded when the session ends. This is used in the final results to calculate the team's ranking alongside the number of puzzles solved.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">Cycle Time</div>
+    <div class="glossary-def">In Game 2 (Handshake), a new hex code is generated every 2,500 ms (2.5 seconds). If the previous code is still pending at cycle end, it auto-fails as a missed code.</div>
+  </div>
+  <div class="glossary-row">
+    <div class="glossary-term">Target Score (Game 2)</div>
+    <div class="glossary-def">In Handshake Protocol, the goal is to reach 10 correct signature verifications (progress = 10). Wrong answers remove 2 points; correct answers add 1 point.</div>
+  </div>
+
+  <div class="section-heading" style="margin-top: 28px;">
+    <span class="icon">⚠️</span>
+    <span class="num">05</span>
+    IMPORTANT REMINDERS
+  </div>
+
+  <div class="intro-block">
+    <p>
+      <strong class="hl-red">Penalties are permanent during the session.</strong>
+      Once a server penalty is recorded, it cannot be reversed by the admin or by solving puzzles faster.
+      The best strategy is always to <em>understand the rules before acting</em>.
+    </p>
+    <p>
+      <strong class="hl-cyan">Read the Guide Manual first.</strong>
+      Several games (especially Game 2 and Game 6) require knowledge of the protocol rules that are
+      found in the player guide manual. The in-game UI will remind you to consult the manual.
+      Attempting to guess these rules will almost certainly result in penalties.
+    </p>
+    <p>
+      <strong class="hl-yellow">Each game has 3 sets</strong> (except Game 2 which has 2).
+      Penalties apply individually within each set — there is no "carry-over" reset between sets.
+      Your total penalty across all sets is what matters on the leaderboard.
+    </p>
+    <p>
+      <strong class="hl-green">Game 4 is unique</strong> — wrong moves only cost local timer seconds,
+      not server penalty. <em>Only a full timeout</em> triggers a server penalty in The Firewall.
+      This means you can afford to make move mistakes as long as you complete the path before the timer hits zero.
+    </p>
+    <p>
+      <strong class="hl-purple">Game 2 is also unique</strong> — the penalty throttle means not every
+      wipe-to-zero triggers a server penalty. Only every <em>second</em> complete progress wipe costs a block.
+      Stay consistent and try not to let the bar drain to zero at all.
+    </p>
+  </div>
+
+  <div class="page-footer">
+    <span>PARAALLAX — PENALTY SYSTEM GUIDE</span>
+    <span>GLOSSARY &amp; REMINDERS</span>
+    <span>PAGE 06</span>
+  </div>
+</div>
+
+</body>
+</html>
