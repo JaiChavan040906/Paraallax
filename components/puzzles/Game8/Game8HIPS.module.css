@@ -1,0 +1,480 @@
+/* ======================================================
+   Game8HIPS — Heuristic Intrusion Prevention System
+   Packet-inspection terminal UI
+   ====================================================== */
+
+.page {
+  min-height: 100vh;
+  background: #070a0e;
+  background-image:
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(0, 180, 255, 0.06) 0%, transparent 70%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 44px 20px 72px;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: #b8ccd8;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Header ─────────────────────────────────────── */
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.setBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 200, 255, 0.28);
+  background: rgba(0, 200, 255, 0.08);
+  color: #7fe4ff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.systemBadges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.systemChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #7a9ab0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #e4f0ff;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.titleIcon {
+  font-size: 1.3rem;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #4e6a7a;
+  letter-spacing: 0.4px;
+}
+
+.headerDivider {
+  margin-top: 10px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 180, 255, 0.3) 0%, transparent 100%);
+}
+
+/* ── Objective panel ──────────────────────────────── */
+.objectivePanel {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.objTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #00c8ff;
+}
+
+.objList {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.83rem;
+  color: #7a9ab0;
+  line-height: 1.9;
+  letter-spacing: 0.2px;
+}
+
+.objList li {
+  padding-left: 4px;
+}
+
+/* ── Warning banner ──────────────────────────────── */
+.warningBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(231, 76, 60, 0.07);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  font-family: "Courier New", monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e74c3c;
+  letter-spacing: 1px;
+  animation: warningPulse 2.5s ease-in-out infinite;
+}
+
+.warningIcon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+@keyframes warningPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* ── Two-column layout ───────────────────────────── */
+.body {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* ── Protocol rules panel ────────────────────────── */
+.rulesPanel {
+  background: #07090d;
+  border: 1px solid rgba(0, 180, 255, 0.15);
+  border-radius: 14px;
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: "Courier New", "Lucida Console", monospace;
+  font-size: 0.83rem;
+  color: #8ab4c8;
+  box-shadow:
+    0 0 0 1px rgba(0, 180, 255, 0.05),
+    0 0 40px rgba(0, 0, 0, 0.7),
+    inset 0 0 60px rgba(0, 180, 255, 0.02);
+}
+
+.rulesPanelTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #00c8ff;
+  border-top: 1px solid rgba(0, 180, 255, 0.18);
+  border-bottom: 1px solid rgba(0, 180, 255, 0.18);
+  padding: 6px 0;
+}
+
+.rulesPanelDesc {
+  font-size: 0.78rem;
+  color: #3d5566;
+  line-height: 1.65;
+}
+
+/* ── Packet queue panel ──────────────────────────── */
+.queuePanel {
+  background: #07090d;
+  border: 1px solid rgba(0, 180, 255, 0.15);
+  border-radius: 14px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: "Courier New", "Lucida Console", monospace;
+  font-size: 0.88rem;
+  color: #8ab4c8;
+  box-shadow:
+    0 0 0 1px rgba(0, 180, 255, 0.05),
+    0 0 40px rgba(0, 0, 0, 0.7),
+    inset 0 0 60px rgba(0, 180, 255, 0.02);
+}
+
+.queueHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #00c8ff;
+  border-top: 1px solid rgba(0, 180, 255, 0.18);
+  border-bottom: 1px solid rgba(0, 180, 255, 0.18);
+  padding: 6px 0;
+}
+
+.queueCount {
+  color: #4e6a7a;
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+}
+
+/* ── Packet list ─────────────────────────────────── */
+.packetList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 440px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.packetList::-webkit-scrollbar {
+  width: 6px;
+}
+.packetList::-webkit-scrollbar-track {
+  background: #07090d;
+}
+.packetList::-webkit-scrollbar-thumb {
+  background: rgba(0, 180, 255, 0.25);
+  border-radius: 4px;
+}
+.packetList::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 180, 255, 0.5);
+}
+
+/* ── Individual packet card ─────────────────────── */
+.packetCard {
+  position: relative;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 180, 255, 0.12);
+  background: rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.packetCard:hover {
+  border-color: rgba(0, 200, 255, 0.4);
+  background: rgba(0, 180, 255, 0.05);
+}
+
+.packetCardQuarantined {
+  border-color: rgba(231, 76, 60, 0.55) !important;
+  background: rgba(231, 76, 60, 0.07) !important;
+  box-shadow: 0 0 14px rgba(231, 76, 60, 0.15);
+}
+
+.packetTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.packetId {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #4e6a7a;
+}
+
+.packetIdQuarantined {
+  color: #e74c3c;
+}
+
+.quarantineTag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.5);
+  border-radius: 4px;
+  padding: 1px 7px;
+  text-transform: uppercase;
+}
+
+.packetData {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #c8e0f0;
+  line-height: 1.5;
+}
+
+.packetDataQuarantined .dataBlock {
+  opacity: 0.55;
+  color: #e74c3c;
+}
+
+.dataBlock {
+  transition: opacity 0.2s;
+}
+
+/* ── Bottom action bar ───────────────────────────── */
+.actionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 180, 255, 0.1);
+}
+
+.feedback {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Messages ────────────────────────────────────── */
+.termMsg {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msgErr {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.07);
+  border-color: rgba(231, 76, 60, 0.3);
+  box-shadow: 0 0 12px rgba(231, 76, 60, 0.1);
+}
+
+.msgOk {
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.07);
+  border-color: rgba(46, 204, 113, 0.3);
+  box-shadow: 0 0 12px rgba(46, 204, 113, 0.1);
+}
+
+/* ── Buttons ─────────────────────────────────────── */
+.termBtn {
+  font-family: "Courier New", monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #00c8ff;
+  background: rgba(0, 180, 255, 0.08);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  border-radius: 6px;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.termBtn:hover:not(:disabled) {
+  background: rgba(0, 180, 255, 0.16);
+  box-shadow: 0 0 16px rgba(0, 180, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.termBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.termBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.termBtnSuccess {
+  font-family: "Courier New", monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.4);
+  border-radius: 6px;
+  padding: 10px 22px;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(46, 204, 113, 0.15);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.termBtnSuccess:hover:not(:disabled) {
+  background: rgba(46, 204, 113, 0.18);
+  box-shadow: 0 0 22px rgba(46, 204, 113, 0.25);
+  transform: translateY(-1px);
+}
+
+.termBtnSuccess:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.termBtnSuccess:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 700px) {
+  .page {
+    padding: 24px 12px 48px;
+  }
+
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 1.1rem;
+  }
+
+  .packetData {
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+  }
+
+  .metaRow {
+    align-items: flex-start;
+  }
+
+  .actionBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .termBtn,
+  .termBtnSuccess {
+    width: 100%;
+    text-align: center;
+  }
+}
