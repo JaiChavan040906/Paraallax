@@ -49,8 +49,15 @@ export default function Game3Set3({ puzzle, onSubmit, submitting }) {
         printLine(`> ${q}`, 'input');
 
         // Normalize spaces and quotes for matching
-        const normalizedInput = q.toLowerCase().replace(/\s+/g, ' ').replace(/'/g, '"').trim();
-        const expected = narrative.expectedQuery.toLowerCase().replace(/\s+/g, ' ').replace(/'/g, '"').trim();
+        const normalizeSql = (s) => s.toLowerCase()
+            .replace(/'/g, '"')          // treat single/double quotes equally
+            .replace(/\s*=\s*/g, '=')    // remove spaces around =
+            .replace(/\s*,\s*/g, ',')    // remove spaces around ,
+            .replace(/\s*;\s*/g, ';')    // remove spaces around ;
+            .replace(/\s+/g, ' ')        // collapse remaining whitespace
+            .trim();
+        const normalizedInput = normalizeSql(q);
+        const expected = normalizeSql(narrative.expectedQuery);
 
         // Exact match checking
         if (normalizedInput === expected) {

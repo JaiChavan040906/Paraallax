@@ -187,7 +187,7 @@ export default function Game4Set2({ puzzle, onSubmit, submitting }) {
       <div className={styles.container}>
         <div className={styles.hudWrapper}>
           <div className={styles.setBadge}>{currentSet.label}</div>
-          <h2 className={styles.title}>THE FIREWALL</h2>
+          <h2 className={styles.title}>COORDINATION DECISION SYSTEM</h2>
           <p className={styles.brief}>
             Movement is validated by protocol logic only.
             <br />
@@ -213,7 +213,7 @@ export default function Game4Set2({ puzzle, onSubmit, submitting }) {
           <div className={styles.setBadge}>{currentSet.label}</div>
           <h2 className={styles.failedTitle}>CONNECTION TERMINATED</h2>
           <p className={styles.brief}>
-            Time expired. The firewall has locked the route.
+            Time expired. COORDINATION DECISION SYSTEM has locked the route.
           </p>
           <button className={styles.initBtn} onClick={startGame}>
             RETRY BREACH

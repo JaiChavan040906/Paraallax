@@ -7,7 +7,7 @@ const games = [
     { id: 1, sets: 3, title: 'Power Grid' },
     { id: 2, sets: 2, title: 'Handshake Protocol' },
     { id: 3, sets: 3, title: 'Database Schema' },
-    { id: 4, sets: 3, title: 'The Firewall' },
+    { id: 4, sets: 3, title: 'COORDINATION DECISION SYSTEM' },
     { id: 5, sets: 3, title: 'OS Deadlock' },
     { id: 6, sets: 3, title: 'Dynamic Cipher Grid' },
     { id: 8, sets: 1, title: 'H.I.P.S. Interceptor' },
