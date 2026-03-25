@@ -3,18 +3,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styles from './Game12Set1.module.css';
 
-// Set 1: ECHO-7
+// Set 3: PULSAR-9
 const CONFIG = { 
-    signalId: "ECHO-7", boardId: "EPSILON",
+    signalId: "PULSAR-9", boardId: "SIGMA",
     channels: {
-        A: { freq: 4, shift: 180 }, B: { freq: 1, shift: 180 }, C: { freq: 5, shift: 180 },
-        D: { freq: 3, shift: 0 },   E: { freq: 2, shift: 0 },   F: { freq: 6, shift: 0 }
+        A: { freq: 2, shift: 270 }, B: { freq: 3, shift: 270 }, C: { freq: 4, shift: 270 },
+        D: { freq: 5, shift: 270 }, E: { freq: 6, shift: 270 }, F: { freq: 1, shift: 270 }
     },
-    targetRecipe: [ { freq: 1, amp: 5, phase: 0 }, { freq: 2, amp: 3, phase: 180 }, { freq: 4, amp: 4, phase: 90 } ]
+    targetRecipe: [ { freq: 1, amp: 3, phase: 180 }, { freq: 2, amp: 4, phase: 270 }, { freq: 3, amp: 5, phase: 90 } ]
 };
 
-export default function Game12Set1({ puzzle, onSubmit, submitting }) {
-
+export default function Game12Set3({ puzzle, onSubmit, submitting }) {
     const [channels, setChannels] = useState({
         A: { on: false, amp: 1, phaseInput: 0, freqMultiplier: CONFIG.channels.A.freq, phaseInterference: CONFIG.channels.A.shift },
         B: { on: false, amp: 1, phaseInput: 0, freqMultiplier: CONFIG.channels.B.freq, phaseInterference: CONFIG.channels.B.shift },

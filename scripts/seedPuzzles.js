@@ -10,9 +10,8 @@ const games = [
     { id: 4, sets: 3, title: 'The Firewall' },
     { id: 5, sets: 3, title: 'OS Deadlock' },
     { id: 6, sets: 3, title: 'Dynamic Cipher Grid' },
-    { id: 7, sets: 3, title: 'Memory Access System' },
     { id: 8, sets: 1, title: 'H.I.P.S. Interceptor' },
-    { id: 9, sets: 1, title: 'Compound Identification Lab' },
+
     { id: 10, sets: 1, title: 'Anomalous Crafting Protocol' },
     { id: 11, sets: 3, title: 'Broken Drone Calibration' },
     { id: 12, sets: 3, title: 'Harmonic Synthesizer' }

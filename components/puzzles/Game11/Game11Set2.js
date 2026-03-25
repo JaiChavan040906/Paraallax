@@ -3,29 +3,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './Game11Set1.module.css';
 
-// Set 1: RX-7 (10, -5). Y-R-Y on Ring 3 = Offset 8, Inverted. TR (Subtract both). 
-// Raw Pitch = 10 - 8 = 2. Raw Roll = -5 - 8 = -13. Inverted swap -> Pitch: -13, Roll: 2.
+// Set 2: TX-9 (-5, +15). R-Y-R on Ring 2 = Offset 5, Normal. BL (Add both).
+// Raw Pitch = -5 + 5 = 0. Raw Roll = 15 + 5 = 20. Normal -> Pitch: 0, Roll: 20.
 const CONFIG = {
-    droneModel: 'RX-7',
-    ring: 3, 
-    quadrant: 1, // Top-Right
-    ledPattern: ['#4ade80', '#3b82f6', '#4ade80'], // green-blue-green
-    requiredPolarity: true,
-    requiredPitch: -13, 
-    requiredRoll: 2  
+    droneModel: 'TX-9',
+    ring: 2, 
+    quadrant: 3, // Bottom-Left
+    ledPattern: ['#ef4444', '#fbbf24', '#ef4444'], // Red-Yellow-Red
+    requiredPolarity: false,
+    requiredPitch: 0,
+    requiredRoll: 20
 };
 
-export default function Game11Set1({ puzzle, onSubmit, submitting }) {
-
+export default function Game11Set2({ puzzle, onSubmit, submitting }) {
     // Calculate visual X/Y based on ring (radius 20px per ring) and quadrant (45 degree angle)
     const radius = CONFIG.ring * 20;
     const angle = 45 * (Math.PI / 180);
     let initX = 0;
     let initY = 0;
     
-    // Quadrant 1: Top-Right
-    initX = radius * Math.cos(angle); 
-    initY = -(radius * Math.sin(angle)); 
+    // Quadrant 3: Bottom-Left
+    initX = -(radius * Math.cos(angle)); 
+    initY = radius * Math.sin(angle); 
 
     const [pitch, setPitch] = useState(0);
     const [roll, setRoll] = useState(0);
@@ -93,7 +92,7 @@ export default function Game11Set1({ puzzle, onSubmit, submitting }) {
         <div className={styles.container}>
             <div className={styles.headerRow}>
                 <h2 className={styles.title}>{puzzle?.title || "Broken Drone Calibration"}</h2>
-                <div className={styles.badge}>UAV TELEMETRY 1</div>
+                <div className={styles.badge}>UAV TELEMETRY 2</div>
             </div>
 
             <p className={styles.subtitle}>The drone is drifting erratically. Consult the UAV Field Repair Schematic to decode the LED errors and apply offset values. HOLD Sync for 3 seconds.</p>
