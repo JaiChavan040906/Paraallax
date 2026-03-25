@@ -63,6 +63,25 @@ const RECIPES = [
     }
 ];
 
+const ITEM_IMAGES = {
+    'Cobblestone': '/crafting/cobble.png',
+    'Stick': '/crafting/stick.png',
+    'Iron Ore': '/crafting/ironore.png',
+    'Diamond Ore': '/crafting/diamond.png', 
+    'Diamond': '/crafting/diamond.png',
+    'Iron Ingot': '/crafting/ironingot.png',
+    'Bucket': '/crafting/bucket.png',
+    'Iron Pickaxe': '/crafting/ironpick.png',
+    'Stone Pickaxe': '/crafting/stonepick.png',
+    'Diamond Pickaxe': '/crafting/diamondpick.png',
+    'Lava Bucket': '/crafting/lavabucket.png',
+    'Water Bucket': '/crafting/waterbucket.png',
+    'Lava Source': '/crafting/lava.png',
+    'Water Source': '/crafting/water.png',
+    'Obsidian': '/crafting/obsidian.png',
+    'Empty': null
+};
+
 export default function Game10Set1({ puzzle, onSubmit, submitting }) {
     const [inventory, setInventory] = useState([
         { item: 'Cobblestone', count: 5 },
@@ -82,6 +101,8 @@ export default function Game10Set1({ puzzle, onSubmit, submitting }) {
     const [isSuccess, setIsSuccess] = useState(false);
     const [message, setMessage] = useState("AWAITING CRAFTING INPUT...");
     const [isCrafting, setIsCrafting] = useState(false);
+
+    const getItemImage = (item) => ITEM_IMAGES[item] || null;
 
     const checkRecipe = () => {
         setIsCrafting(true);
@@ -213,10 +234,18 @@ export default function Game10Set1({ puzzle, onSubmit, submitting }) {
                         <div className={styles.sectionTitle}>ENVIRONMENT</div>
                         <div className={styles.envGrid}>
                             <div className={`${styles.envSlot} ${styles['env-' + envLava.replace(' ', '')]}`} onClick={() => handleEnvClick('Lava')}>
-                                {envLava === 'Empty' && envObsidian === 'Cobblestone' ? 'Cobblestone' : envLava}
+                                {envLava === 'Empty' && envObsidian === 'Cobblestone' ? (
+                                    <img src={getItemImage('Cobblestone')} alt="Cobblestone" className={styles.envImg} />
+                                ) : (
+                                    getItemImage(envLava) ? <img src={getItemImage(envLava)} alt={envLava} className={styles.envImg} /> : envLava
+                                )}
                             </div>
                             <div className={`${styles.envSlot} ${styles['env-' + envWater.replace(' ', '')]}`} onClick={() => handleEnvClick('Water')}>
-                                {envWater === 'Empty' && envObsidian === 'Obsidian' ? 'Obsidian' : envWater}
+                                {envWater === 'Empty' && envObsidian === 'Obsidian' ? (
+                                    <img src={getItemImage('Obsidian')} alt="Obsidian" className={styles.envImg} />
+                                ) : (
+                                    getItemImage(envWater) ? <img src={getItemImage(envWater)} alt={envWater} className={styles.envImg} /> : envWater
+                                )}
                             </div>
                         </div>
                     </div>
@@ -231,7 +260,9 @@ export default function Game10Set1({ puzzle, onSubmit, submitting }) {
                                     className={`${styles.invItem} ${selectedInv === inv.item ? styles.selected : ''}`}
                                     onClick={() => handleInvClick(inv.item)}
                                 >
-                                    <div className={styles.itemSpritePlaceholder}></div>
+                                    <div className={styles.itemSprite}>
+                                        <img src={getItemImage(inv.item)} alt={inv.item} />
+                                    </div>
                                     <span>{inv.item} <span style={{color: '#eab308'}}>x{inv.count}</span></span>
                                 </div>
                             ))}
@@ -259,7 +290,7 @@ export default function Game10Set1({ puzzle, onSubmit, submitting }) {
                                         className={`${styles.crucibleSlot} ${item ? styles.filled : ''}`}
                                         onClick={() => handleCrucibleClick(idx)}
                                     >
-                                        {item}
+                                        {item ? <img src={getItemImage(item)} alt={item} className={styles.slotImg} /> : null}
                                     </div>
                                 ))}
                             </div>
