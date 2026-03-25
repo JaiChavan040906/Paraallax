@@ -23,6 +23,11 @@ import Game7Set2 from '@/components/puzzles/Game7/Game7Set2';
 import Game7Set3 from '@/components/puzzles/Game7/Game7Set3';
 import Game8Set1 from '@/components/puzzles/Game8/Game8Set1';
 import Game9Set1 from '@/components/puzzles/Game9/Game9Set1';
+import Game9Set2 from '@/components/puzzles/Game9/Game9Set2';
+import Game9Set3 from '@/components/puzzles/Game9/Game9Set3';
+import Game10Set1 from '@/components/puzzles/Game10/Game10Set1';
+import Game11Set1 from '@/components/puzzles/Game11/Game11Set1';
+import Game12Set1 from '@/components/puzzles/Game12/Game12Set1';
 
 
 
@@ -121,11 +126,35 @@ export default function PuzzleRenderer({ puzzle, onSubmit, submitting }) {
 
         case 'game9set1':
         case 'game9-set1':
+            return <Game9Set1 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+
         case 'game9set2':
         case 'game9-set2':
+            return <Game9Set2 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+
         case 'game9set3':
         case 'game9-set3':
-            return <Game9Set1 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+            return <Game9Set3 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+
+        case 'game10set1':
+        case 'game10-set1':
+            return <Game10Set1 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+
+        case 'game11set1':
+        case 'game11-set1':
+        case 'game11set2':
+        case 'game11-set2':
+        case 'game11set3':
+        case 'game11-set3':
+            return <Game11Set1 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+
+        case 'game12set1':
+        case 'game12-set1':
+        case 'game12set2':
+        case 'game12-set2':
+        case 'game12set3':
+        case 'game12-set3':
+            return <Game12Set1 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
 
         default:
             return <div className="text-terminal-red border border-terminal-red p-4 rounded text-xs">Unknown Error: This sector is missing. Request administrator intervention.</div>;

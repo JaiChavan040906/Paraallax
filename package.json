@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:vpn": "next dev -H 26.184.96.80",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

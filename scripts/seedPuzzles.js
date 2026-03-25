@@ -12,7 +12,10 @@ const games = [
     { id: 6, sets: 3, title: 'Dynamic Cipher Grid' },
     { id: 7, sets: 3, title: 'Memory Access System' },
     { id: 8, sets: 1, title: 'H.I.P.S. Interceptor' },
-    { id: 9, sets: 1, title: 'Compound Identification Lab' }
+    { id: 9, sets: 1, title: 'Compound Identification Lab' },
+    { id: 10, sets: 1, title: 'Anomalous Crafting Protocol' },
+    { id: 11, sets: 3, title: 'Broken Drone Calibration' },
+    { id: 12, sets: 3, title: 'Harmonic Synthesizer' }
 ];
 
 const puzzles = [];
@@ -21,6 +24,7 @@ games.forEach(game => {
         puzzles.push({
             puzzleId: `game${game.id}set${setIdx}`,
             type: `game${game.id}set${setIdx}`,
+            activeSet: setIdx,
             title: `${game.title} - Set ${setIdx}`,
             prompt: `Interactive module: ${game.title} (Set ${setIdx})`,
             uiConfig: {},
@@ -45,6 +49,7 @@ async function main() {
             const PuzzleSchema = new mongoose.Schema({
                 puzzleId: { type: String, unique: true, required: true },
                 type: { type: String, required: true },
+                activeSet: { type: Number, default: 1 },
                 title: { type: String, required: true },
                 prompt: { type: String, required: true },
                 uiConfig: { type: mongoose.Schema.Types.Mixed, default: {} },

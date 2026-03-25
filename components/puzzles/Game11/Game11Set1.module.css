@@ -1,0 +1,284 @@
+.container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+.badge {
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid var(--primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    max-width: 600px;
+}
+
+.hudContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    background: rgba(0, 5, 10, 0.8);
+    border: 2px solid #0f3c4c;
+    border-radius: 12px;
+    padding: 1rem;
+    position: relative;
+}
+
+.droneRadar {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background: radial-gradient(circle at center, rgba(30, 80, 100, 0.4) 0%, transparent 70%);
+    border: 1px solid rgba(0, 200, 255, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.crosshairLine {
+    stroke: rgba(0, 255, 255, 0.3);
+    stroke-width: 1;
+}
+
+.droneIcon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Propeller spin animation */
+.propeller {
+    transform-origin: center;
+    animation: spin 0.2s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.dronePath {
+    stroke: #0bb;
+    stroke-width: 2;
+    fill: none;
+}
+
+.dronePathOff {
+    stroke: #f55;
+}
+
+.telemetryPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    font-family: monospace;
+}
+
+.telemetryHeader {
+    font-size: 1.2rem;
+    color: #0dd;
+    border-bottom: 1px solid #0dd;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.modelDisplay {
+    font-family: monospace;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    background: rgba(0, 255, 255, 0.05);
+    border-radius: 4px;
+    border-left: 3px solid #0ff;
+}
+
+.ringDisplay {
+    font-family: monospace;
+    font-size: 0.9rem;
+    padding-left: 0.5rem;
+}
+
+.ledStrip {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+    align-items: center;
+}
+
+.led {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #333;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; filter: brightness(1.5); box-shadow: 0 0 10px currentColor; }
+    50% { opacity: 0.3; filter: none; box-shadow: none; }
+}
+
+.controlsGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: rgba(0, 50, 70, 0.2);
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 200, 255, 0.1);
+}
+
+.inputRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.numberInput {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #0dd;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    width: 60px;
+    font-family: monospace;
+    font-size: 1rem;
+    text-align: right;
+}
+
+.polaritySwitch {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: #442222;
+    border-radius: 15px;
+    cursor: pointer;
+    border: 2px solid #522;
+    transition: all 0.3s;
+}
+
+.polaritySwitch.inverted {
+    background: #224422;
+    border-color: #252;
+}
+
+.polarityKnob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.polaritySwitch.inverted .polarityKnob {
+    left: 32px;
+}
+
+.syncBtn {
+    background: rgba(0, 150, 255, 0.2);
+    border: 1px solid #0dd;
+    color: #0dd;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.syncBtn:active {
+    background: rgba(0, 150, 255, 0.4);
+}
+
+.syncBtn.syncing .syncProgress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(0, 255, 255, 0.3);
+    animation: fillSync 3s linear forwards;
+}
+
+@keyframes fillSync {
+    to { width: 100%; }
+}
+
+.statusSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+}
+
+.statusMessage {
+    font-family: monospace;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.successMsg {
+    color: #4ade80;
+    border-color: #4ade80;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+}
+
+.completeBtn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s;
+    align-self: center;
+}
+
+.completeBtn:hover {
+    transform: scale(1.05);
+}

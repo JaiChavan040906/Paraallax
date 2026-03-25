@@ -5,9 +5,9 @@ const PuzzleSchema = new mongoose.Schema(
         puzzleId: { type: String, required: true, unique: true },
         type: {
             type: String,
-            enum: ['logic', 'handshake', 'schema'],
             required: true,
         },
+        activeSet: { type: Number, default: 1 },
         title: { type: String, required: true },
         prompt: { type: String, required: true },
         uiConfig: { type: mongoose.Schema.Types.Mixed, default: {} },
