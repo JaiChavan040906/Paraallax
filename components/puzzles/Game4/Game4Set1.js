@@ -187,7 +187,7 @@ export default function Game4Set1({ puzzle, onSubmit, submitting }) {
       <div className={styles.container}>
         <div className={styles.hudWrapper}>
           <div className={styles.setBadge}>{currentSet.label}</div>
-          <h2 className={styles.title}>THE FIREWALL</h2>
+          <h2 className={styles.title}>COORDINATION DECISION SYSTEM</h2>
           <p className={styles.brief}>
             Movement is validated by protocol logic only.
             <br />
@@ -199,7 +199,7 @@ export default function Game4Set1({ puzzle, onSubmit, submitting }) {
             {GRID_SIZE} | Time Limit: 2:00
           </p>
           <button className={styles.initBtn} onClick={startGame}>
-            BREACH FIREWALL
+            BREACH SYSTEM
           </button>
         </div>
       </div>
@@ -213,7 +213,7 @@ export default function Game4Set1({ puzzle, onSubmit, submitting }) {
           <div className={styles.setBadge}>{currentSet.label}</div>
           <h2 className={styles.failedTitle}>CONNECTION TERMINATED</h2>
           <p className={styles.brief}>
-            Time expired. The firewall has locked the route.
+            Time expired. The system has locked the route.
           </p>
           <button className={styles.initBtn} onClick={startGame}>
             RETRY BREACH
@@ -228,11 +228,11 @@ export default function Game4Set1({ puzzle, onSubmit, submitting }) {
       <div className={styles.container}>
         <div className={styles.hudWrapper}>
           <div className={styles.setBadge}>{currentSet.label}</div>
-          <h2 className={styles.successTitle}>FIREWALL BYPASSED</h2>
+          <h2 className={styles.successTitle}>SYSTEM BYPASSED</h2>
           <p className={styles.brief}>
             Target reached. Decision protocol executed successfully.
           </p>
-          <div className="text-terminal-green animate-pulse">SUBMITTING FIREWALL COMPLETION...</div>
+          <div className="text-terminal-green animate-pulse">SUBMITTING SYSTEM COMPLETION...</div>
         </div>
       </div>
     );
