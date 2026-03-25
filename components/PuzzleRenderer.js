@@ -21,8 +21,7 @@ import Game6Set3 from '@/components/puzzles/Game6/Game6Set3';
 import Game8Set1 from '@/components/puzzles/Game8/Game8Set1';
 
 import Game10Set1 from '@/components/puzzles/Game10/Game10Set1';
-import Game10Set2 from '@/components/puzzles/Game10/Game10Set2';
-import Game10Set3 from '@/components/puzzles/Game10/Game10Set3';
+
 import Game11Set1 from '@/components/puzzles/Game11/Game11Set1';
 import Game11Set2 from '@/components/puzzles/Game11/Game11Set2';
 import Game11Set3 from '@/components/puzzles/Game11/Game11Set3';
@@ -120,13 +119,7 @@ export default function PuzzleRenderer({ puzzle, onSubmit, submitting }) {
         case 'game10-set1':
             return <Game10Set1 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
 
-        case 'game10set2':
-        case 'game10-set2':
-            return <Game10Set2 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
 
-        case 'game10set3':
-        case 'game10-set3':
-            return <Game10Set3 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
 
         case 'game11set1':
         case 'game11-set1':
