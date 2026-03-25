@@ -11,7 +11,8 @@ const games = [
     { id: 5, sets: 3, title: 'OS Deadlock' },
     { id: 6, sets: 3, title: 'Dynamic Cipher Grid' },
     { id: 7, sets: 3, title: 'Memory Access System' },
-    { id: 8, sets: 1, title: 'H.I.P.S. Interceptor' }
+    { id: 8, sets: 1, title: 'H.I.P.S. Interceptor' },
+    { id: 9, sets: 1, title: 'Compound Identification Lab' }
 ];
 
 const puzzles = [];

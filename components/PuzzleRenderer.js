@@ -22,7 +22,7 @@ import Game7Set1 from '@/components/puzzles/Game7/Game7Set1';
 import Game7Set2 from '@/components/puzzles/Game7/Game7Set2';
 import Game7Set3 from '@/components/puzzles/Game7/Game7Set3';
 import Game8Set1 from '@/components/puzzles/Game8/Game8Set1';
-
+import Game9Set1 from '@/components/puzzles/Game9/Game9Set1';
 
 
 
@@ -118,6 +118,14 @@ export default function PuzzleRenderer({ puzzle, onSubmit, submitting }) {
         case 'game8set1':
         case 'game8-set1':
             return <Game8Set1 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
+
+        case 'game9set1':
+        case 'game9-set1':
+        case 'game9set2':
+        case 'game9-set2':
+        case 'game9set3':
+        case 'game9-set3':
+            return <Game9Set1 puzzle={puzzle} onSubmit={onSubmit} submitting={submitting} />;
 
         default:
             return <div className="text-terminal-red border border-terminal-red p-4 rounded text-xs">Unknown Error: This sector is missing. Request administrator intervention.</div>;
